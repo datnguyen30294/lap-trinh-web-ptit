@@ -31,3 +31,7 @@ backend, cơ sở dữ liệu, xây dựng các APIs,...
 - Demo sản phẩm website chạy tốt, demo toàn bộ các chức năng theo đúng yêu cầu.
 - Điểm sẽ có căn cứ theo tỷ lệ % đóng góp của các thành viên (do nhóm sinh viên tự
 thống nhất) để đảm bảo công bằng (không cào bằng).
+=======
+
+khang đã join nào dự án là lá lô 
+

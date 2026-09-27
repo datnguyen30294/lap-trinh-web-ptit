@@ -33,5 +33,17 @@ backend, cơ sở dữ liệu, xây dựng các APIs,...
 thống nhất) để đảm bảo công bằng (không cào bằng).
 =======
 
-khang đã join nào dự án là lá lô 
 
+## CSDL GoBus theo ERD — dữ liệu Hà Nội
+
+CSDL MySQL gồm **7 bảng theo `CSDL.drawio.svg`**. Có dữ liệu mẫu tuyến 02, 26 và BRT01 ở Hà Nội; lịch chạy, số km và giá theo công thức đề tài là dữ liệu demo.
+
+- [Hướng dẫn kết nối, cấu trúc và nguồn dữ liệu](database/README.md)
+- [SQL tạo CSDL](database/01-schema.sql)
+- [SQL dữ liệu mẫu Hà Nội](database/02-seed-hanoi.sql)
+- [ERD gốc](database/source/CSDL.drawio.svg)
+
+Chạy MySQL: sao chép `.env.example` thành `.env` nếu chưa có, rồi `docker compose up -d`.
+Kết nối mặc định: `127.0.0.1:3309`, database `gobus_hanoi_erd`, tài khoản `gobus` (mật khẩu trong `.env`).
+
+Phạm vi hiện tại chỉ làm CSDL; chưa triển khai lại ứng dụng và chưa chạy bộ test.

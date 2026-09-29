@@ -1,0 +1,43 @@
+# GoBus frontend
+
+## Overview
+
+This package is a React 19 application created with Vite 8 using JavaScript and JSX. `src/pages/StationsPage.jsx` and `src/components/stations/` implement station administration; App.jsx gates it with existing-user login.
+
+## Key files
+
+| File | Owns |
+|---|---|
+| `index.html` | Provides the `root` element and expects `/src/main.jsx`. |
+| `vite.config.js` | Enables React and proxies /api to the root .env PORT (default 3001). |
+| `eslint.config.js` | Configures JavaScript, React Hooks, and React Refresh lint rules. |
+| `src/pages/` | Intended location for page components. |
+| `src/components/` | Intended location for reusable components. |
+
+## Commands
+
+Run from `frontend/`:
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+npm test
+```
+
+## Conventions
+
+- Write React components in `.jsx` and keep shared components separate from page components.
+- Request application data through backend APIs; do not connect the browser to MySQL.
+- Check the design references in `../docs/design/` when implementing a designed screen.
+
+- Design system: follow `design.md` and `src/styles.css`, sourced from Figma. Active station labels are green, inactive gray.
+- Vitest and Testing Library cover UI behavior; browser verification covers native dialogs, responsive layout and real MySQL flows.
+
+## Gotchas
+
+- `src/main.jsx` loads App.jsx, local Geist fonts and styles.css. Stations UI is available at / and /stations.
+- `src/services/stationsApi.js` uses fetch with session cookies and X-GoBus-Request. Refresh lists from the API after mutations.
+
+_Drafted by /audit from the repo, worth a quick human pass. Edit freely: once a line stops matching this draft, later runs treat it as curated and will flag rather than overwrite it._

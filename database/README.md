@@ -139,3 +139,7 @@ Tra cứu ngày 27/09/2026. Chỉ sử dụng tên và thứ tự hành lang/đi
 - `scripts/generate_seed.py`: tái tạo seed SQL từ danh sách nguồn và hai bcrypt hash truyền vào qua JSON; không bắt buộc chạy script này để import CSDL.
 
 Đã xác nhận MySQL khởi động, các file SQL import thành công và đọc được bảng/view. Chưa chạy bộ test hoặc kiểm thử tải theo yêu cầu của bạn.
+
+## Module stations và database đã tồn tại
+
+Schema local được chọn trong root `.env` có thể khác bản ERD trên. Xem [hướng dẫn migration bảo toàn dữ liệu](../docs/stations-module.md#database-thực-tế-và-migration). `migrations/004-stations-module.mjs` bổ sung ba cột trạng thái khi thiếu; không import lại seed hoặc xóa volume.

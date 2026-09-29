@@ -26,4 +26,7 @@ export class Station {
     length: 255,
   })
   address: string;
+
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean;
 }

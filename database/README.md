@@ -143,3 +143,7 @@ Tra cứu ngày 27/09/2026. Chỉ sử dụng tên và thứ tự hành lang/đi
 ## Module stations và database đã tồn tại
 
 Schema local được chọn trong root `.env` có thể khác bản ERD trên. Xem [hướng dẫn migration bảo toàn dữ liệu](../docs/stations-module.md#database-thực-tế-và-migration). `migrations/004-stations-module.mjs` bổ sung ba cột trạng thái khi thiếu; không import lại seed hoặc xóa volume.
+
+## Module routes và phút hành trình
+
+`migrations/005-routes-module.mjs` thêm `route_stops.minutes_from_origin SMALLINT UNSIGNED NULL` khi DB hiện có thiếu cột. Giữ NULL của dữ liệu cũ, không tự suy từ km, không sửa schema khác hay chạy lại seed. Script có backup riêng tư và checksum cột gốc. Xem [hướng dẫn tuyến và điểm dừng](../docs/routes-module.md) trước khi chạy. Backend vẫn dùng `synchronize: false`.

@@ -1,45 +1,120 @@
-import { useEffect, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
+import SchedulesPage from './pages/SchedulesPage';
+import RoutesPage from './pages/RoutesPage';
 import StationsPage from './pages/StationsPage';
 import LoginPage from './pages/LoginPage';
+import UserHomePage from './pages/UserHomePage';
 import { authApi } from './services/stationsApi';
+import {
+  adminPaths,
+  currentPath,
+  homePath,
+  navigate,
+  resolvePath,
+  subscribePath,
+} from './utils/navigation';
 
 export default function App() {
+  const path = useSyncExternalStore(subscribePath, currentPath);
+  const initialAdminPath = useRef(
+    adminPaths.includes(currentPath()) ? currentPath() : null,
+  );
+  const sessionRequest = useRef(0);
+  const invalidateSessionRequest = useCallback(() => {
+    sessionRequest.current++;
+  }, []);
   const [session, setSession] = useState({
     loading: true,
     user: null,
     error: '',
+    message: '',
   });
-  const [message, setMessage] = useState('');
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [logoutError, setLogoutError] = useState('');
-  function loadSession() {
+  const loadSession = useCallback(() => {
+    const requestId = ++sessionRequest.current;
     authApi
       .me()
-      .then((user) => setSession({ loading: false, user, error: '' }))
-      .catch((error) =>
-        setSession({
+      .then((user) => {
+        if (requestId === sessionRequest.current)
+          setSession({ loading: false, user, error: '', message: '' });
+      })
+      .catch((error) => {
+        if (requestId !== sessionRequest.current) return;
+        setSession((previous) => ({
           loading: false,
           user: null,
           error: error.status === 401 ? '' : error.message,
-        }),
-      );
-  }
+          message:
+            error.status === 401 && previous.user
+              ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
+              : previous.message,
+        }));
+      });
+  }, []);
   useEffect(() => {
     loadSession();
     function expired() {
-      setSession({ loading: false, user: null, error: '' });
-      setMessage('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      invalidateSessionRequest();
+      setSession({
+        loading: false,
+        user: null,
+        error: '',
+        message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.',
+      });
+      setLogoutError('');
+    }
+    function visible() {
+      if (document.visibilityState === 'visible') loadSession();
     }
     window.addEventListener('gobus:session-expired', expired);
-    return () => window.removeEventListener('gobus:session-expired', expired);
-  }, []);
+    window.addEventListener('focus', loadSession);
+    window.addEventListener('pageshow', loadSession);
+    document.addEventListener('visibilitychange', visible);
+    return () => {
+      invalidateSessionRequest();
+      window.removeEventListener('gobus:session-expired', expired);
+      window.removeEventListener('focus', loadSession);
+      window.removeEventListener('pageshow', loadSession);
+      document.removeEventListener('visibilitychange', visible);
+    };
+  }, [loadSession, invalidateSessionRequest]);
+  const destination = resolvePath(path, session.user);
+  useEffect(() => {
+    if (!session.loading && !session.error && destination !== path)
+      navigate(destination);
+  }, [destination, path, session.loading, session.error]);
+  function login(user) {
+    sessionRequest.current++;
+    setLogoutError('');
+    setSession({ loading: false, user, error: '', message: '' });
+    navigate(
+      user.role === 'ADMIN'
+        ? initialAdminPath.current || '/stations'
+        : homePath(user.role) || '/login',
+    );
+    initialAdminPath.current = null;
+  }
   async function logout() {
     setLogoutBusy(true);
     setLogoutError('');
     try {
       await authApi.logout();
-      setSession({ loading: false, user: null, error: '' });
-      setMessage('Đã đăng xuất.');
+      sessionRequest.current++;
+      initialAdminPath.current = null;
+      setSession({
+        loading: false,
+        user: null,
+        error: '',
+        message: 'Đã đăng xuất.',
+      });
+      navigate('/login');
     } catch (error) {
       setLogoutError(error.message);
     } finally {
@@ -63,13 +138,40 @@ export default function App() {
       </main>
     );
   if (!session.user)
+    return <LoginPage message={session.message} onLogin={login} />;
+  const user = session.user;
+  if (!homePath(user.role))
     return (
-      <LoginPage
-        message={message}
-        onLogin={(user) => setSession({ loading: false, user, error: '' })}
+      <main className="app-state">
+        <h1>Tài khoản không có quyền truy cập</h1>
+        <p>Vai trò tài khoản không hợp lệ. Vui lòng liên hệ quản trị viên.</p>
+        {logoutError && <p role="alert">{logoutError}</p>}
+        <button className="button" onClick={logout} disabled={logoutBusy}>
+          Đăng xuất
+        </button>
+      </main>
+    );
+  if (destination !== '/user/home' && !adminPaths.includes(destination))
+    return (
+      <main className="app-state">
+        <h1>Không tìm thấy trang</h1>
+        <p>Đường dẫn này không tồn tại trong GoBus.</p>
+        <a className="button" href={homePath(user.role)}>
+          Về trang chủ
+        </a>
+      </main>
+    );
+  if (user.role === 'USER')
+    return (
+      <UserHomePage
+        user={user}
+        onLogout={logout}
+        logoutBusy={logoutBusy}
+        logoutError={logoutError}
       />
     );
-  const user = session.user;
+  const schedulesPage = destination === '/schedules';
+  const routesPage = destination === '/routes';
   return (
     <div className="admin-app">
       <a href="#main-content" className="skip-link">
@@ -94,53 +196,51 @@ export default function App() {
           {logoutError}
         </div>
       )}
-      {user.role !== 'ADMIN' ? (
-        <main className="app-state" id="main-content">
-          <h1>Bạn không có quyền quản trị</h1>
-          <p>
-            Tài khoản này chưa có quyền ADMIN. Hãy đăng xuất và sử dụng tài
-            khoản quản trị.
-          </p>
-        </main>
-      ) : (
-        <div className="admin-body">
-          <aside className="sidebar">
-            <nav aria-label="Quản trị">
-              {[
-                ['gitbranch', 'Quản lý tuyến xe'],
-                ['calendar', 'Quản lý lịch trình'],
-              ].map(([icon, label]) => (
-                <span
-                  className="nav-item unavailable"
-                  key={icon}
-                  title="Chưa triển khai trong module này"
-                  aria-disabled="true"
-                >
-                  <img src={`/icons/${icon}.svg`} alt="" />
-                  {label}
-                </span>
-              ))}
-              <a
-                href="/stations"
-                className="nav-item selected"
-                aria-current="page"
-              >
-                <img src="/icons/mappin.svg" alt="" />
-                Quản lý bến xe
-              </a>
-              <span
-                className="nav-item unavailable"
-                title="Chưa triển khai trong module này"
-                aria-disabled="true"
-              >
-                <img src="/icons/tag.svg" alt="" />
-                Quản lý giá vé
-              </span>
-            </nav>
-          </aside>
+      <div className="admin-body">
+        <aside className="sidebar">
+          <nav aria-label="Quản trị">
+            <a
+              href="/routes"
+              className={`nav-item ${routesPage ? 'selected' : ''}`}
+              aria-current={routesPage ? 'page' : undefined}
+            >
+              <img src="/icons/gitbranch.svg" alt="" />
+              Quản lý tuyến xe
+            </a>
+            <a
+              href="/schedules"
+              className={`nav-item ${schedulesPage ? 'selected' : ''}`}
+              aria-current={schedulesPage ? 'page' : undefined}
+            >
+              <img src="/icons/calendar.svg" alt="" />
+              Quản lý lịch trình
+            </a>
+            <a
+              href="/stations"
+              className={`nav-item ${!routesPage && !schedulesPage ? 'selected' : ''}`}
+              aria-current={!routesPage && !schedulesPage ? 'page' : undefined}
+            >
+              <img src="/icons/mappin.svg" alt="" />
+              Quản lý bến xe
+            </a>
+            <span
+              className="nav-item unavailable"
+              title="Chưa triển khai trong module này"
+              aria-disabled="true"
+            >
+              <img src="/icons/tag.svg" alt="" />
+              Quản lý giá vé
+            </span>
+          </nav>
+        </aside>
+        {schedulesPage ? (
+          <SchedulesPage />
+        ) : routesPage ? (
+          <RoutesPage />
+        ) : (
           <StationsPage />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

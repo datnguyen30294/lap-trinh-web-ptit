@@ -1,4 +1,4 @@
-async function request(path, { method = 'GET', body, signal } = {}) {
+export async function request(path, { method = 'GET', body, signal } = {}) {
   let response;
   try {
     response = await fetch(`/api${path}`, {

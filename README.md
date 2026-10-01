@@ -1,15 +1,48 @@
-> Trang chủ USER theo Figma đã triển khai tại `/user/home`, đăng nhập chung tại `/login`: [hướng dẫn và kiểm chứng](docs/user-home-module.md). Module quản lý lịch trình ở `/schedules`: [hướng dẫn chạy](docs/schedules-module.md), [báo cáo kiểm chứng](docs/schedules-verification.md). Các phần mô tả cũ bên dưới có thể chưa phản ánh ứng dụng hiện tại.
+# GoBus — Lập trình web PTIT
 
-# lap-trinh-web-ptit
+Ứng dụng quản lý xe buýt: React 19 + Vite (JavaScript/JSX), NestJS + TypeORM (TypeScript), MySQL 8.4. Xác thực dùng session cookie, phân quyền ADMIN/USER.
 
-Hướng dẫn ứng dụng GoBus hiện tại: [quản lý tuyến và điểm dừng](docs/routes-module.md), [quản lý bến](docs/stations-module.md), [kết quả kiểm chứng tuyến](docs/routes-verification.md). Frontend hiện dùng React JavaScript và Vite; backend NestJS TypeScript, xác thực session ADMIN.
+## Chạy sau khi clone
 
-tất cả về môn lâoj trình web thầy Trần Quý Nam
-# Bo-stack
-Front-end: React + TypeScript
-Back-end: Node.js + NestJS (có thể học Express trước)
-Database: MySQL
-Kèm theo: REST API, JWT, Git và Docker
+Cài Node.js 24+ và Docker Desktop, mở Docker Desktop, rồi chạy từ thư mục gốc:
+
+```bash
+node database/scripts/setup-local.mjs
+```
+
+Lệnh tạo `.env` nếu chưa có, tạo session secret, khởi động MySQL và chuẩn bị database đúng phiên bản. Không xóa volume hoặc nạp đè database đã có dữ liệu. Hướng dẫn Windows/macOS/Linux, kết nối Workbench/DBeaver và xử lý database cũ: [database/README.md](database/README.md).
+
+Mở hai terminal:
+
+```bash
+cd backend
+npm ci
+npm run start:dev
+```
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+Mở [GoBus](http://localhost:5173/login). Database mặc định: `127.0.0.1:3309`, `gobus_hanoi_student`, user `gobus`, mật khẩu trong `.env`.
+
+Tài khoản demo trên database mới: `admin@gobus.local` / `GoBusAdmin2026!` và `an@gobus.local` / `GoBusUser2026!`. Không dùng những tài khoản mẫu này cho triển khai thật.
+
+## Các module hiện có
+
+- [Trang chủ USER theo Figma và tra cứu tuyến](docs/user-home-module.md): `/user/home`.
+- [Quản lý bến xe](docs/stations-module.md): `/stations`.
+- [Quản lý tuyến và điểm dừng](docs/routes-module.md): `/routes`.
+- [Quản lý lịch trình](docs/schedules-module.md): `/schedules`.
+
+Database gồm users, stations, routes, route_stops, vehicles, schedules và bookings. Bộ SQL trong `database/` đồng bộ với cấu trúc ứng dụng. Đặt vé, thanh toán và bản đồ chưa triển khai đầy đủ.
+
+## Kiểm tra
+
+Frontend: `npm run build`, `npm run lint`, `npm test`. Backend: `npm run build`, `npm run lint`, `npm test`, `npm run test:e2e` (MySQL và TEST_* trong `.env`).
+
 # yeu-cau-de-bai
 I. Yêu cầu chung cho tất cả các đề tài (mỗi nhóm có <= 3 sinh viên):
 - Front-end: HTML, CSS, JavaScript (có thể dùng framework cơ bản như React,
@@ -36,19 +69,3 @@ backend, cơ sở dữ liệu, xây dựng các APIs,...
 - Demo sản phẩm website chạy tốt, demo toàn bộ các chức năng theo đúng yêu cầu.
 - Điểm sẽ có căn cứ theo tỷ lệ % đóng góp của các thành viên (do nhóm sinh viên tự
 thống nhất) để đảm bảo công bằng (không cào bằng).
-=======
-
-
-## CSDL GoBus theo ERD — dữ liệu Hà Nội
-
-CSDL MySQL gồm **7 bảng theo `CSDL.drawio.svg`**. Có dữ liệu mẫu tuyến 02, 26 và BRT01 ở Hà Nội; lịch chạy, số km và giá theo công thức đề tài là dữ liệu demo.
-
-- [Hướng dẫn kết nối, cấu trúc và nguồn dữ liệu](database/README.md)
-- [SQL tạo CSDL](database/01-schema.sql)
-- [SQL dữ liệu mẫu Hà Nội](database/02-seed-hanoi.sql)
-- [ERD gốc](database/source/CSDL.drawio.svg)
-
-Chạy MySQL: sao chép `.env.example` thành `.env` nếu chưa có, rồi `docker compose up -d`.
-Kết nối mặc định: `127.0.0.1:3309`, database `gobus_hanoi_erd`, tài khoản `gobus` (mật khẩu trong `.env`).
-
-Phạm vi hiện tại chỉ làm CSDL; chưa triển khai lại ứng dụng và chưa chạy bộ test.

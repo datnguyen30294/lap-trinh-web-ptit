@@ -1,123 +1,147 @@
-# CSDL GoBus — ERD và dữ liệu Hà Nội
+# Database GoBus — dùng cho ứng dụng hiện tại
 
-CSDL đã được tạo từ `source/CSDL.drawio.svg`, theo yêu cầu ngày 27/09/2026. Phạm vi hiện tại **chỉ là CSDL**; chưa khôi phục frontend/backend và chưa chạy bộ test.
+Bộ SQL hiện tại khớp NestJS và database `gobus_hanoi_student`: có `vehicles`, `schedules.vehicle_id`, `bookings.passenger_name`. Git chứa cấu trúc và dữ liệu mẫu; không chứa Docker volume, `.env`, tài khoản hoặc dữ liệu riêng trên máy thành viên.
 
-## Mở và kết nối
+## Máy mới sau khi clone
 
-MySQL 8.4 đang chạy bằng Docker Compose:
+Cài Node.js 24+ và Docker Desktop, mở Docker Desktop rồi chạy từ thư mục gốc project:
 
-| Thông số | Giá trị mặc định local |
-|---|---|
+```bash
+node database/scripts/setup-local.mjs
+```
+
+Lệnh dùng được trên Windows, macOS và Linux, không cần cài MySQL riêng hoặc Python. Nó:
+
+1. Tạo `.env` từ `.env.example` nếu chưa có, tạo SESSION_SECRET ngẫu nhiên riêng. Nếu `.env` đã có thì giữ cấu hình; chỉ bổ sung SESSION_SECRET khi còn trống.
+2. Khởi động MySQL 8.4, chờ server TCP sẵn sàng sau khi import xong.
+3. Volume mới: Docker tự nhập schema, seed và views. Volume đã có nhưng database được chọn chưa có bảng: khởi tạo riêng database đó và cấp quyền cho tài khoản ứng dụng.
+4. Database tương thích đã có: giữ nguyên schema và dữ liệu, không nạp lại seed. Database không tương thích: dừng với tên bảng/cột còn thiếu, không ghi đè.
+
+Sau đó mở hai terminal:
+
+```bash
+# Terminal backend, từ gốc project
+cd backend
+npm ci
+npm run start:dev
+```
+
+```bash
+# Terminal frontend, từ gốc project
+cd frontend
+npm ci
+npm run dev
+```
+
+Mở http://localhost:5173/login. Nếu đổi WEB_ORIGIN hoặc PORT, khởi động lại frontend/backend.
+
+## Kết nối bằng DBeaver hoặc MySQL Workbench
+
+| Trường | Mặc định cho máy mới |
+| --- | --- |
 | Host | `127.0.0.1` |
-| Port | `3309` |
-| Database | `gobus_hanoi_erd` |
-| Username | `gobus` |
-| Password | `gobus-local-2026` — cấu hình tại `.env` |
-| Charset | `utf8mb4`, hỗ trợ tiếng Việt |
-| Thời gian lưu | UTC; khi hiển thị đổi sang `+07:00` |
+| Port | `3309` (không phải 3306 trên máy host) |
+| Database | `gobus_hanoi_student` |
+| User | `gobus` |
+| Password | Giá trị `DB_PASSWORD` trong `.env` của máy đó |
+| Charset | `utf8mb4` |
 
-Có thể dùng DBeaver, MySQL Workbench hoặc CLI. Cấu hình này chỉ bind cổng MySQL trên loopback của máy.
+Docker dùng cổng 3306 **bên trong container**, ánh xạ ra DB_PORT trên máy host. `127.0.0.1` của mỗi người là máy của người đó, không kết nối vào database trên máy người tạo project.
 
-```bash
-cd /Users/endgame/lap-trinh-web-ptit
-# Máy mới: sao chép .env.example thành .env rồi chỉnh cấu hình nếu cần.
-docker compose up -d
-```
-
-Mở MySQL trong container:
+Mở CLI trong container (nhập DB_PASSWORD khi được hỏi):
 
 ```bash
-docker compose exec mysql mysql -u gobus -p gobus_hanoi_erd
+docker compose exec mysql mysql -u gobus -p gobus_hanoi_student
 ```
 
-Docker tự import `01-schema.sql`, `02-seed-hanoi.sql`, `03-views.sql` khi volume được khởi tạo lần đầu. Lần khởi động sau giữ nguyên dữ liệu. Không cần xóa volume.
+Nếu đã thay DB_NAME hoặc DB_USER, dùng giá trị tương ứng trong `.env`. Compose đọc cả hai giá trị này, các SQL không còn câu `USE` cố định.
 
-Nếu đã có MySQL 8.0.16+ / 8.4 bên ngoài Docker, mở và chạy ba file SQL theo đúng thứ tự trong Workbench, hoặc:
+## Thành viên đã chạy bộ SQL cũ
+
+Nếu `.env` đang trỏ tới `gobus_hanoi_erd` và báo thiếu `vehicles`, `vehicle_id` hoặc `passenger_name`:
+
+1. Giữ nguyên database cũ để bảo toàn dữ liệu.
+2. Đặt `DB_NAME=gobus_hanoi_student` trong `.env` (hoặc tên database mới chưa có dữ liệu nếu tên đó đã tồn tại nhưng không tương thích).
+3. Giữ đúng mật khẩu đã dùng khi tạo volume, chạy lại `node database/scripts/setup-local.mjs`.
+
+Lệnh sẽ tạo database ứng dụng riêng ngay trong volume hiện có và cấp quyền cho DB_USER. Đây là khởi tạo dữ liệu demo mới, **không tự chuyển lịch sử hoặc tài khoản từ schema ERD cũ**.
+
+Máy đang dùng database ứng dụng tương thích không cần đổi DB_NAME hay chạy migration mới. Giữ nguyên dữ liệu đang làm việc. Các migration `004-stations-module.mjs` và `005-routes-module.mjs` chỉ dùng cho bản ứng dụng cũ thiếu cột trạng thái hoặc phút hành trình; chúng không chuyển đổi schema ERD sang schema có vehicles.
+
+Không dùng `docker compose down -v` hoặc xóa database để xử lý lỗi cài đặt. Thay MYSQL_DATABASE/MYSQL_PASSWORD trong Compose không tự sửa dữ liệu/tài khoản đã có trong volume.
+
+## Khởi tạo thủ công, không dùng Docker
+
+Cần MySQL 8.4; trong Workbench dùng tài khoản có quyền tạo database:
+
+```sql
+CREATE DATABASE gobus_hanoi_student CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE gobus_hanoi_student;
+```
+
+Giữ database này được chọn rồi chạy lần lượt `01-schema.sql`, `02-seed-hanoi.sql`, `03-views.sql` trên một database trống. Hoặc với MySQL CLI:
 
 ```bash
-mysql -u root -p < database/01-schema.sql
-mysql -u root -p < database/02-seed-hanoi.sql
-mysql -u root -p < database/03-views.sql
+mysql -u root -p gobus_hanoi_student < database/01-schema.sql
+mysql -u root -p gobus_hanoi_student < database/02-seed-hanoi.sql
+mysql -u root -p gobus_hanoi_student < database/03-views.sql
 ```
 
-Các file tạo schema/seed không có `DROP DATABASE`, `DROP TABLE`, `TRUNCATE` hay thao tác xóa dữ liệu. `CREATE TABLE IF NOT EXISTS` dành cho khởi tạo; không tự sửa một schema khác đã tồn tại cùng tên.
+Trên PowerShell, có thể dùng Workbench hoặc lệnh `SOURCE` trong MySQL CLI thay cho chuyển hướng `<`. Cấu hình `.env` theo host/port/user thật và tạo SESSION_SECRET bằng hướng dẫn trong `.env.example`. `CREATE TABLE IF NOT EXISTS` không phải công cụ migration: không import bộ này lên database khác cấu trúc đã có dữ liệu.
 
-## Bảy bảng theo ERD
+## Cấu trúc và dữ liệu mẫu
 
-| Thực thể ERD | Bảng MySQL | Vai trò |
-|---|---|---|
-| USER | `users` | Tài khoản, mật khẩu băm, vai trò ADMIN/USER |
-| STATION | `stations` | Bến và điểm dừng |
-| ROUTES | `routes` | Tuyến một chiều, đầu/cuối, giờ hoạt động, chiều dài |
-| Route_stop | `route_stops` | Các bến trên tuyến theo thứ tự |
-| schedule | `schedules` | Chuyến cụ thể, mã xe, sức chứa, ngày giờ |
-| fares | `fares` | Giá cho cặp bến thuộc một tuyến |
-| booking | `bookings` | Một vé cho một hành khách trong một lần đặt |
+| Bảng | Vai trò | Số hàng khi khởi tạo |
+| --- | --- | ---: |
+| users | Tài khoản ADMIN/USER, mật khẩu bcrypt, trạng thái | 3 |
+| stations | Bến và điểm dừng | 19 |
+| routes | Tuyến một chiều, bến đầu/cuối, giờ hoạt động | 6 |
+| route_stops | Thứ tự, km và phút từ đầu tuyến | 40 |
+| vehicles | Mã xe, sức chứa | 6 |
+| schedules | Lịch chuyến liên kết tuyến và xe | 504 |
+| bookings | Một vé/một hành khách, lưu giá tại thời điểm đặt | 3 |
 
-Không thêm bảng `admin`: quản trị viên là `users.role = 'ADMIN'`. Không thêm bảng `vehicles`: ERD gốc đặt `vehicle_code` và `capacity` ở `schedules`. Đây là lựa chọn theo yêu cầu bám ERD; báo cáo `GoBus_Bao_cao_CSDL_hoan_chinh.docx` có mô hình 8 bảng khác với sơ đồ này.
+Bốn view: `v_route_details`, `v_schedule_details`, `v_segment_availability`, `v_booking_details`. `04-example-queries.sql` có ví dụ chỉ đọc, tính giá minh họa từ km thay cho bảng fares không còn trong mô hình ứng dụng.
 
-Các quan hệ HAS, APPEARS_IN, HAS_SCHEDULES, HAS_FARES, MAKES, HAS_BOOKINGS được chuyển thành khóa ngoại. Hai vai trò điểm đón/trả được giữ riêng tại `from_station_id` và `to_station_id`.
+- `users.phone` tùy chọn; `users.is_active` và `stations.is_active` có mặc định true; `routes.status` có mặc định ACTIVE.
+- `route_stops.minutes_from_origin` cho phép NULL để tương thích dữ liệu cũ. Dữ liệu demo mới luôn có phút đầy đủ; backend chặn tạo lịch khi chưa biết thời lượng.
+- `schedules.vehicle_id` liên kết `vehicles`; giữ unique `(vehicle_id, departure_at)` kể cả chuyến đã hủy.
+- `bookings.passenger_name` là tên hành khách. `unit_price` là giá đã chốt, không tính lại khi dữ liệu tuyến thay đổi.
+- DATETIME lưu UTC, giao diện hiển thị giờ Việt Nam. Tính chỗ trống theo từng đoạn giao nhau, không lấy sức chứa trừ toàn bộ vé của chuyến.
+- TypeORM `synchronize: false`. Schema mới đối chiếu với cấu trúc database ứng dụng, không xuất dữ liệu riêng hoặc bộ đếm AUTO_INCREMENT từ máy phát triển.
+- `source/CSDL.drawio.svg` giữ làm tài liệu ERD gốc; nó chưa phản ánh mô hình triển khai hiện tại có vehicles và không có fares.
 
-Các hiệu chỉnh khi chuyển mô hình khái niệm sang CSDL chạy được:
-
-- Chuẩn hóa tên bảng số nhiều, cột dùng `snake_case`, PK/FK dùng `BIGINT UNSIGNED` thống nhất.
-- Sửa lỗi gõ `ccontact_phone` thành `contact_phone`; giữ `contact_name` như ERD.
-- ERD lặp thuộc tính `booked_at`: CSDL chỉ lưu một cột; bổ sung `cancelled_at` cho nghiệp vụ hủy vé.
-- Bổ sung `routes.name`, `stations.code`, `is_active` của bến/tài khoản và cặp bến đầu/cuối theo đặc tả.
-- Bổ sung `route_stops.km_from_origin` để tính giá từng chặng theo công thức đề tài.
-- `bookings` không có số ghế, số lượng khách hay tổng tiền: mỗi hàng tương ứng đúng một vé, giá giữ tại `unit_price`.
-
-## Dữ liệu mẫu đã nạp
-
-| Nội dung | Số lượng khi khởi tạo |
-|---|---:|
-| Tài khoản demo | 3 |
-| Bến/địa điểm dừng chọn lọc ở Hà Nội | 19 |
-| Tuyến theo chiều | 6 |
-| Quan hệ tuyến–điểm dừng | 40 |
-| Giá vé chặng | 130 |
-| Chuyến demo | 504 |
-| Vé demo | 3 |
-
-Ba tuyến tham chiếu: **02 Bác Cổ – Yên Nghĩa**, **26 Mai Động – Sân vận động Quốc gia**, **BRT01 Kim Mã – Yên Nghĩa**. Mỗi tuyến có bản ghi `-DI` và `-VE`; không suy diễn rằng một bản ghi tuyến tự hỗ trợ hai chiều.
-
-Đây là **bộ dữ liệu học tập lấy địa danh và hành lang tuyến ở Hà Nội**, không phải bản sao đầy đủ dữ liệu vận hành hiện hành:
-
-- Danh sách chỉ giữ các điểm dừng/địa danh tiêu biểu; không chứa toàn bộ nhà chờ, tọa độ, cột đỗ và phía đường thực tế.
-- `km_from_origin`, `minutes_from_origin`, `distance_km`, giờ hoạt động 05:00–22:00, sức chứa, mã xe `DEMO-HN-*` và các giờ khởi hành được dựng để demo. Không dùng làm lịch đi xe ngoài thực tế.
-- Chiều về sử dụng các điểm tiêu biểu theo thứ tự ngược để minh họa mô hình. Lộ trình đường một chiều và cột đỗ riêng chiều về chưa được mô hình hóa.
-- Giá chặng = `ROUND(4000 + 500 × (km_đến − km_đi), 0)` theo yêu cầu tài liệu dự án. **Đây không phải biểu giá chính thức của xe buýt Hà Nội.**
-- Tài khoản, họ tên, số điện thoại và vé mẫu đều là dữ liệu giả lập. Không nhập thông tin khách hàng thật.
-- 504 chuyến được tạo cho 14 ngày, bắt đầu ngày kế tiếp theo giờ Hà Nội, lúc 06:00, 09:00, 12:00, 15:00, 18:00, 21:00. Mỗi chiều có một mã xe demo riêng; thời gian giữa các chuyến không chồng lấn.
-
-Có thể chạy lại seed để bổ sung cửa sổ 14 ngày mới; các bản ghi đã tồn tại không bị cập nhật, không đặt lại mật khẩu hay giá do bạn đã sửa. Tổng chuyến có thể tăng theo thời gian khi bổ sung ngày mới.
-
-### Tài khoản ứng dụng mẫu
+### Đăng nhập demo trên database mới
 
 | Email | Vai trò | Mật khẩu demo |
-|---|---|---|
-| `admin@gobus.local` | ADMIN | `GoBusAdmin2026!` |
-| `an@gobus.local` | USER | `GoBusUser2026!` |
-| `binh@gobus.local` | USER | `GoBusUser2026!` |
+| --- | --- | --- |
+| admin@gobus.local | ADMIN | GoBusAdmin2026! |
+| an@gobus.local | USER | GoBusUser2026! |
+| binh@gobus.local | USER | GoBusUser2026! |
 
-Trong bảng `users`, mật khẩu là bcrypt có salt, cost 12. Các tài khoản này phục vụ frontend/backend nối vào sau; hiện chỉ CSDL đang chạy.
+Đây là tài khoản mẫu công khai dùng cho bài tập. Bộ SQL chứa hash bcrypt cost 12; không xuất hash/tài khoản trên database riêng. `.env.example` đã có các TEST_* tương ứng để chạy bộ kiểm thử trên database mới.
 
-## Ràng buộc và giới hạn
+Dữ liệu tuyến 02, 26, BRT01 gồm các điểm tiêu biểu ở Hà Nội, mỗi tuyến có chiều DI/VE riêng. Km, phút, giờ hoạt động 05:00–22:00, xe, sức chứa và giá `ROUND(4000 + 500 × km_chặng, 0)` là dữ liệu học tập, không phải dữ liệu vận hành hay giá chính thức. Lịch demo bắt đầu từ ngày mai theo giờ Việt Nam, kéo dài 14 ngày, 6 chuyến/ngày/chiều, không chồng giờ của cùng xe. Ba vé mẫu gồm hai vé xác nhận và một vé hủy.
 
-Đã có PK, FK, UNIQUE, CHECK, chỉ mục tìm kiếm và `ON DELETE RESTRICT`. Khóa ngoại kép của `fares` đảm bảo cả hai bến thuộc cùng tuyến. CHECK chặn bến đầu/cuối trùng, quãng đường âm, giá âm, sức chứa không hợp lệ, giờ đến trước giờ đi và thời điểm hủy không hợp lệ.
+Seed có thể chạy lặp trên database demo chưa sửa hành trình, không ghi đè các hàng đã có; chạy vào ngày khác có thể bổ sung lịch mới. `setup-local.mjs` luôn bỏ qua seed nếu database không trống. `scripts/refresh-demo.sh` chỉ dành cho database demo của Compose, không dùng để migration hay nạp dữ liệu vào database làm việc đã sửa tuyến.
 
-Các điều kiện nhiều hàng cần transaction ở backend hoặc stored procedure khi bổ sung phần ứng dụng: điểm dừng liên tục và tăng dần; đầu/cuối trùng điểm dừng; đúng chiều chặng; bến của vé thuộc tuyến của chuyến; giá hiện hành; xe không trùng khoảng chạy; bảo toàn lịch sử; kiểm soát quyền và sức chứa. File schema không tuyên bố các quy tắc đó đã được cưỡng chế hoàn toàn chỉ bằng FK/CHECK.
+## Chẩn đoán nhanh
 
-Đặt/hủy vé cần khóa cùng hàng `schedules` bằng `SELECT ... FOR UPDATE`, kiểm tra lại giá, giờ chạy và số vé trên **từng đoạn**, rồi ghi vé trong cùng transaction. Không lấy `capacity - tổng mọi vé của chuyến`, vì các vé trên hai đoạn không giao nhau có thể sử dụng cùng một chỗ. Mọi thao tác sửa/hủy lịch trình và thay đổi dữ liệu liên quan phải tham gia quy ước khóa này.
+| Lỗi | Kiểm tra |
+| --- | --- |
+| Không kết nối Docker | Mở Docker Desktop, đợi engine chạy |
+| ECONNREFUSED / connection refused | MySQL chưa sẵn sàng, sai DB_PORT; chạy `docker compose ps` |
+| Unknown database | Sai DB_NAME hoặc database chưa được tạo trên máy này; dùng setup-local |
+| Access denied | Sai DB_USER/DB_PASSWORD hoặc mật khẩu volume cũ khác `.env` |
+| Thiếu vehicles/vehicle_id/passenger_name | Đang dùng schema ERD cũ; xem hướng dẫn database đã tồn tại |
+| SESSION_SECRET thiếu | Chạy setup-local hoặc bổ sung secret ít nhất 32 ký tự |
+| Backend chạy nhưng frontend không đăng nhập | Dùng đúng `http://localhost:5173` theo WEB_ORIGIN |
 
-Bốn view hỗ trợ nối ứng dụng:
+Xem log bằng `docker compose logs --tail=80 mysql`. Không gửi `.env` hoặc mật khẩu lên Git; khi nhờ hỗ trợ chỉ gửi thông báo lỗi đã bỏ thông tin bí mật.
 
-- `v_route_details`: tuyến với tên hai bến đầu/cuối.
-- `v_schedule_details`: chuyến, kèm giờ hiển thị tại Hà Nội.
-- `v_segment_availability`: số khách và chỗ còn lại trên từng đoạn liên tiếp.
-- `v_booking_details`: chi tiết vé và giờ đón/trả theo offset điểm dừng.
+## Kiểm chứng
 
-`04-example-queries.sql` chứa ví dụ tra cứu tuyến, tìm chuyến Tràng Thi → PTIT, đọc vé cá nhân và xem giá chặng; chỉ thực hiện SELECT/SET, không tạo hoặc hủy vé.
+Xem [báo cáo khởi tạo database mới](../docs/database-bootstrap-verification.md). Bộ kiểm thử ứng dụng: `npm run test:e2e` trong backend, yêu cầu MySQL và TEST_* đúng. Dữ liệu demo nằm trong Git; muốn các thành viên nhận thay đổi cần commit/push các file mới rồi họ pull.
 
 ## Nguồn địa danh và tuyến
 
@@ -128,22 +152,3 @@ Tra cứu ngày 27/09/2026. Chỉ sử dụng tên và thứ tự hành lang/đi
 3. [Lotrinh.vn — Tuyến 26](https://lotrinh.vn/tourl/47_Lotrinh_Xe_Bus_Ha_Noi,_Tuyen_26_Mai_Dong_SVD_Quoc_Gia.aspx): hành lang Mai Động, Thanh Nhàn, Chùa Bộc, Cầu Giấy, Sân vận động Quốc gia.
 4. [Moovit — Tuyến 02, danh sách điểm dừng](https://appassets.mvtdev.com/map/176/l/2921/17099497.pdf): điểm Học viện Công nghệ Bưu chính Viễn thông trên Trần Phú.
 5. [Moovit — BRT01 Kim Mã → Yên Nghĩa](https://moovitapp.com/index/vi/ph%C6%B0%C6%A1ng_ti%E1%BB%87n_c%C3%B4ng_c%E1%BB%99ng-time-brt01-H%C3%A0_N%E1%BB%99i-2921-1597502-17099457-9156357-0): thứ tự các nhà chờ BRT tiêu biểu.
-
-## Các file
-
-- `01-schema.sql`: tạo database và 7 bảng.
-- `02-seed-hanoi.sql`: dữ liệu mẫu, import trực tiếp được.
-- `03-views.sql`: các view hỗ trợ đọc dữ liệu.
-- `04-example-queries.sql`: truy vấn tham khảo.
-- `source/CSDL.drawio.svg`: bản sao ERD gốc, không chỉnh sửa.
-- `scripts/generate_seed.py`: tái tạo seed SQL từ danh sách nguồn và hai bcrypt hash truyền vào qua JSON; không bắt buộc chạy script này để import CSDL.
-
-Đã xác nhận MySQL khởi động, các file SQL import thành công và đọc được bảng/view. Chưa chạy bộ test hoặc kiểm thử tải theo yêu cầu của bạn.
-
-## Module stations và database đã tồn tại
-
-Schema local được chọn trong root `.env` có thể khác bản ERD trên. Xem [hướng dẫn migration bảo toàn dữ liệu](../docs/stations-module.md#database-thực-tế-và-migration). `migrations/004-stations-module.mjs` bổ sung ba cột trạng thái khi thiếu; không import lại seed hoặc xóa volume.
-
-## Module routes và phút hành trình
-
-`migrations/005-routes-module.mjs` thêm `route_stops.minutes_from_origin SMALLINT UNSIGNED NULL` khi DB hiện có thiếu cột. Giữ NULL của dữ liệu cũ, không tự suy từ km, không sửa schema khác hay chạy lại seed. Script có backup riêng tư và checksum cột gốc. Xem [hướng dẫn tuyến và điểm dừng](../docs/routes-module.md) trước khi chạy. Backend vẫn dùng `synchronize: false`.

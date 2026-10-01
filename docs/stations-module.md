@@ -44,7 +44,7 @@ Nếu đổi origin hoặc port, khởi động lại cả backend và Vite. Coo
 
 ## Database thực tế và migration
 
-Tại thời điểm triển khai, `.env` trỏ tới **gobus_hanoi_student** ở cổng 3309, có 32 bến, 10 tuyến, 43 điểm dừng, 60 lịch trình, 5 vé, 3 user và 10 xe. Database này khác bản ERD `gobus_hanoi_erd` trong `01-schema.sql`.
+Tại thời điểm triển khai module, `.env` trỏ tới **gobus_hanoi_student** ở cổng 3309, có 32 bến, 10 tuyến, 43 điểm dừng, 60 lịch trình, 5 vé, 3 user và 10 xe. Từ 01/10/2026, `database/01-schema.sql` đã đồng bộ cấu trúc ứng dụng này; bộ seed mới có số hàng demo riêng. Máy mới dùng `node database/scripts/setup-local.mjs`; xem `database/README.md` để xử lý bản ERD cũ mà không xóa dữ liệu.
 
 Đã bổ sung đúng ba cột bị thiếu:
 

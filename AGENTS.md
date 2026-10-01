@@ -13,6 +13,8 @@
 
 ## Commands
 
+Fresh clone: `node database/scripts/setup-local.mjs` creates local env/session secret and initializes the matching application database without overwriting existing data. See `database/README.md` for old ERD databases.
+
 ```bash
 docker compose up -d
 cd backend && npm install && npm run start:dev
@@ -35,7 +37,7 @@ Schedule module design is `docs/specs/0003-schedules-management.md`; run and ver
 
 - Passenger homepage and role navigation spec: `docs/specs/0004-user-home.md`; run and verification notes: `docs/user-home-module.md`.
 
-- Read the current code and manifests before changing a feature. The root README still describes an earlier frontend setup.
+- Read the current code and manifests before changing a feature. The root README and database setup describe the current application stack.
 - Keep database access in the NestJS backend. The React frontend calls backend APIs.
 - Treat `database/01-schema.sql` as the database structure. TypeORM has `synchronize: false`; change the schema deliberately instead of relying on entity synchronization.
 - Keep environment values in the ignored root `.env`; do not put credentials in source files or these context files.

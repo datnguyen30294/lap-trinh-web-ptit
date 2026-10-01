@@ -27,7 +27,7 @@ Backend local dùng cổng 3001, Vite 5173. Cấu hình DB, `SESSION_SECRET`, `W
 
 ## Schema đã xác minh
 
-DB thực tế có `vehicles`, không có `fares`; `schedules` có `vehicle_id`, `bookings` dùng `passenger_name`. Không đổi database để khớp `database/01-schema.sql`.
+DB ứng dụng có `vehicles`, không có `fares`; `schedules` có `vehicle_id`, `bookings` dùng `passenger_name`. Từ 01/10/2026, bộ `database/01-schema.sql` đã đồng bộ cấu trúc này. Máy mới dùng `node database/scripts/setup-local.mjs`; máy đang có dữ liệu giữ nguyên database. Xem `database/README.md` nếu đã import bản ERD cũ.
 
 `routes` dùng mã tối đa 20 ký tự, tên 180, giờ MySQL TIME, khoảng cách DECIMAL(8,2), trạng thái ACTIVE/INACTIVE. `route_stops` dùng thứ tự SMALLINT UNSIGNED, km DECIMAL(8,2). Migration 005 chỉ thêm `minutes_from_origin SMALLINT UNSIGNED NULL` nếu thiếu. Script sao lưu schema và dữ liệu vào `.local/backups/` với quyền file 0600, rồi so SHA256 các cột gốc. Có thể chạy lại an toàn. Thực hiện migration khi không có thao tác ghi đồng thời để bản sao lưu và phép đối chiếu nhất quán.
 

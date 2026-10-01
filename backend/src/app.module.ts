@@ -4,7 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
+import { RoutesModule } from './routes/routes.module.js';
+import { SchedulesModule } from './schedules/schedules.module.js';
 import { StationsModule } from './stations/stations.module.js';
+import { PassengerModule } from './passenger/passenger.module.js';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { StationsModule } from './stations/stations.module.js';
 
     AuthModule,
     StationsModule,
+    RoutesModule,
+    SchedulesModule,
+    PassengerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

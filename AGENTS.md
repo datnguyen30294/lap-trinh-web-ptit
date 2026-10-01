@@ -27,7 +27,13 @@ Run each `cd` command from the repository root in a separate terminal or return 
 
 Store new workflow specs in `docs/specs/NNNN-title.md`. Existing project requirements and wireframe links are in `docs/design/`. Station module design is `docs/specs/0001-stations-management.md`; run instructions are in `docs/stations-module.md`.
 
+Route module design is `docs/specs/0002-routes-stops-management.md`; run and migration instructions are in `docs/routes-module.md`.
+
+Schedule module design is `docs/specs/0003-schedules-management.md`; run and verification instructions are in `docs/schedules-module.md` and `docs/schedules-verification.md`.
+
 ## Rules
+
+- Passenger homepage and role navigation spec: `docs/specs/0004-user-home.md`; run and verification notes: `docs/user-home-module.md`.
 
 - Read the current code and manifests before changing a feature. The root README still describes an earlier frontend setup.
 - Keep database access in the NestJS backend. The React frontend calls backend APIs.

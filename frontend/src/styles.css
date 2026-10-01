@@ -774,3 +774,367 @@ fieldset {
     animation: none;
   }
 }
+
+/* Route administration, Figma 84:7 / 84:126 / 84:234. */
+.routes-page {
+  padding: 32px;
+}
+.routes-page h1,
+.route-facts dd,
+.route-timeline strong {
+  overflow-wrap: anywhere;
+}
+.routes-page .button-primary {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.routes-page .button-primary:hover:not(:disabled) {
+  background: #1e40af;
+}
+.breadcrumb {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.breadcrumb button {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.route-filters {
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.routes-page .table-shell {
+  overflow-x: auto;
+}
+.routes-table {
+  min-width: 1050px;
+}
+.routes-table .station-status {
+  white-space: normal;
+  min-width: 100px;
+}
+.route-link {
+  color: var(--blue);
+  border: 0;
+  background: none;
+  padding: 8px 0;
+  font-weight: 600;
+  text-align: left;
+}
+.route-link:hover {
+  text-decoration: underline;
+}
+.route-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+.route-card h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+.route-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 20px;
+}
+.route-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.derived-field {
+  padding: 10px 12px;
+  min-height: 44px;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.section-heading {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+  margin-bottom: 20px;
+}
+.section-heading h2 {
+  margin-bottom: 4px;
+}
+.section-heading p {
+  font-size: var(--small);
+}
+.stop-editor {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+}
+.stop-editor li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.stop-editor .form-field {
+  margin-bottom: 0;
+  font-size: var(--small);
+}
+.stop-station {
+  flex: 1 1 230px;
+  min-width: 0;
+}
+.stop-value {
+  width: 140px;
+}
+.stop-number {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-radius: 50%;
+  font-weight: 600;
+}
+.route-note {
+  background: var(--blue-soft);
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+.route-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0 0 24px;
+}
+.route-facts dt {
+  color: var(--muted);
+  font-size: var(--small);
+}
+.route-facts dd {
+  margin: 6px 0 0;
+  font-weight: 500;
+}
+.route-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+}
+.route-timeline li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.route-timeline li:last-child {
+  border-bottom: 0;
+}
+.stop-metrics {
+  margin-left: auto;
+  white-space: nowrap;
+  color: var(--muted);
+}
+@media (max-width: 1100px) {
+  .routes-page {
+    padding: 24px 16px;
+  }
+  .route-card {
+    padding: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .routes-page {
+    padding: 20px 16px;
+  }
+  .routes-table {
+    min-width: 0;
+  }
+  .route-grid,
+  .route-grid-three,
+  .route-facts {
+    grid-template-columns: 1fr;
+  }
+  .route-card {
+    padding: 16px;
+  }
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .stop-editor li {
+    gap: 12px;
+  }
+  .stop-station {
+    flex-basis: calc(100% - 50px);
+  }
+  .stop-value {
+    width: calc(50% - 6px);
+  }
+  .route-timeline li {
+    flex-wrap: wrap;
+  }
+  .stop-metrics {
+    margin-left: 46px;
+  }
+}
+
+/* Schedules: Figma 89:2, 89:209, 89:436. */
+.schedules-page {
+  padding: 24px;
+}
+.schedule-timezone {
+  font-size: var(--small);
+  color: var(--muted);
+  margin: 12px 0 20px;
+}
+.schedule-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+.schedule-filters .form-field {
+  flex: 1 1 150px;
+  margin: 0;
+  font-size: 12px;
+}
+.schedule-filters .form-field:first-child {
+  flex-basis: 220px;
+}
+.schedule-filters input,
+.schedule-filters select {
+  min-width: 0;
+}
+.schedules-table {
+  min-width: 1120px;
+}
+.schedules-table td {
+  padding: 16px;
+}
+.schedules-table .muted {
+  font-size: 12px;
+  margin-top: 4px;
+}
+.schedule-departure {
+  color: var(--blue);
+  font-weight: 600;
+}
+.schedule-status {
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.schedule-scheduled {
+  color: var(--blue);
+  background: var(--blue-soft);
+}
+.schedule-departed {
+  color: #854d0e;
+  background: #fefce8;
+}
+.schedule-completed {
+  color: #166534;
+  background: #f0fdf4;
+}
+.schedule-cancelled {
+  color: var(--muted);
+  background: var(--soft);
+}
+.station-dialog.schedule-panel {
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  height: calc(100dvh - 96px);
+  max-height: calc(100dvh - 32px);
+  margin: auto 24px auto auto;
+  border-radius: 16px;
+  border-color: #bfdbfe;
+  padding: 24px;
+}
+.schedule-panel::backdrop {
+  background: rgb(248 250 252 / 70%);
+}
+.schedule-panel .dialog-heading {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+}
+.schedule-panel > .muted {
+  font-size: 12px;
+  margin-bottom: 24px;
+}
+.schedule-panel .button-primary {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.schedule-panel .route-note,
+.schedule-panel .alert {
+  font-size: 14px;
+}
+.schedule-panel .alert img {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+}
+.schedule-route-summary {
+  background: var(--blue-soft);
+  color: var(--blue);
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+.schedule-panel .field-hint {
+  color: var(--muted);
+  font-size: 12px;
+  margin: -8px 0 20px;
+}
+.schedules-table .icon-button img {
+  width: 14px;
+  height: 14px;
+}
+@media (max-width: 760px) {
+  .schedules-page {
+    padding: 20px 16px;
+  }
+  .schedules-table {
+    min-width: 0;
+  }
+  .schedule-filters .form-field,
+  .schedule-filters .form-field:first-child {
+    flex-basis: 100%;
+  }
+  .station-dialog.schedule-panel {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+    padding: 20px;
+  }
+  .schedules-page .stop-metrics {
+    white-space: normal;
+  }
+}

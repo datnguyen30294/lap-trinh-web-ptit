@@ -24,25 +24,25 @@ export default function LoginPage({ onLogin, message = '' }) {
     <main className="login-page">
       <section className="login-intro">
         <a className="wordmark" href="/">
-          GOBUS <span>ADMIN</span>
+          GOBUS
         </a>
         <div>
-          <p className="eyebrow">HỆ THỐNG QUẢN TRỊ</p>
+          <p className="eyebrow">ĐỒNG HÀNH CÙNG GOBUS</p>
           <h1>
-            Quản lý bến xe.
+            Hành trình xanh.
             <br />
             Kết nối hành trình.
           </h1>
           <p>
-            Quản lý thông tin và trạng thái các bến xe trong hệ thống GoBus, tập
-            trung tại một nơi.
+            Đăng nhập để khám phá các tuyến xe và kết nối hành trình của bạn
+            cùng GoBus.
           </p>
         </div>
         <p className="login-footer">GoBus · Quản lý vận tải hành khách</p>
       </section>
       <section className="login-panel">
         <form className="login-form" onSubmit={submit}>
-          <h2>Đăng nhập quản trị</h2>
+          <h2>Đăng nhập GoBus</h2>
           <p className="muted">Sử dụng tài khoản được cấp trong hệ thống.</p>
           {message && (
             <div className="alert" role="status">
@@ -85,7 +85,7 @@ export default function LoginPage({ onLogin, message = '' }) {
             {busy ? 'Đang đăng nhập…' : 'Đăng nhập'}
           </button>
           <p className="login-help muted">
-            Chỉ tài khoản có quyền quản trị mới có thể quản lý bến xe.
+            GoBus sẽ đưa bạn đến trang phù hợp với tài khoản của mình.
           </p>
         </form>
       </section>

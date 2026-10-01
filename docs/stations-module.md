@@ -132,3 +132,7 @@ Frontend dùng Vitest, Testing Library và jsdom cho tải/rỗng/lỗi, bộ l�
 Đăng nhập đủ để module hoạt động local một backend instance. Session hiện nằm trong bộ nhớ, hết sau 8 giờ hoặc khi restart backend. Trước triển khai production cần session store dùng chung/bền vững, HTTPS và cấu hình reverse proxy tin cậy. Chưa có đăng ký, quên mật khẩu, màn quản lý tài khoản hay quản lý tuyến.
 
 Máy hiện tại dùng Node 25.9.0; các kiểm tra đã chạy được nhưng npm có cảnh báo engine từ Nest CLI/Angular devkit. Có thể chuyển sang phiên bản Node đáp ứng engines đã ghi trong package, ví dụ Node 24.15 trở lên thuộc nhánh 24.
+
+## Tích hợp quản lý tuyến
+
+Module tuyến hiện đã triển khai tại `/routes`, dùng chung session, request protection và shell quản trị. Xem [hướng dẫn tuyến và điểm dừng](routes-module.md). Tạo/sửa/kích hoạt tuyến khóa các bến trước route để phối hợp với kiểm tra ngừng bến hiện có. Các giới hạn chưa có module tuyến trong phần mô tả ban đầu ở trên đã được thay thế bởi phần tích hợp này.

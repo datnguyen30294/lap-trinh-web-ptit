@@ -1,10 +1,21 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import type { ValidationError } from 'class-validator';
 import type { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import session from 'express-session';
 import { rateLimit } from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 import './auth/session.types.js';
+
+const validationMessages = (errors: ValidationError[]): string[] =>
+  errors.flatMap((e) => [
+    ...Object.entries(e.constraints ?? {}).map(([key, msg]) =>
+      key === 'whitelistValidation'
+        ? `Trường ${e.property} không được phép.`
+        : msg,
+    ),
+    ...validationMessages(e.children ?? []),
+  ]);
 
 export function setupApp(app: INestApplication) {
   const config = app.get(ConfigService);
@@ -67,13 +78,7 @@ export function setupApp(app: INestApplication) {
       forbidNonWhitelisted: true,
       exceptionFactory: (errors) =>
         new BadRequestException({
-          message: errors.flatMap((e) =>
-            Object.entries(e.constraints ?? {}).map(([key, msg]) =>
-              key === 'whitelistValidation'
-                ? `Trường ${e.property} không được phép.`
-                : msg,
-            ),
-          ),
+          message: validationMessages(errors),
         }),
     }),
   );

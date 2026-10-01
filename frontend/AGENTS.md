@@ -35,9 +35,19 @@ npm test
 - Design system: follow `design.md` and `src/styles.css`, sourced from Figma. Active station labels are green, inactive gray.
 - Vitest and Testing Library cover UI behavior; browser verification covers native dialogs, responsive layout and real MySQL flows.
 
+- Routes UI is at `/routes`, implemented in `src/pages/RoutesPage.jsx` and `src/components/routes/`. `routesApi.js` reuses the authenticated request helper exported by `stationsApi.js`.
+- Route forms load real stations, derive endpoints from ordered stops, and keep user input when the API rejects a mutation.
+
+- Schedules UI is at `/schedules`, with a right panel form, detail timeline and status confirmation. `scheduleTime.js` explicitly converts Vietnam datetime input to UTC and displays Asia/Ho_Chi_Minh.
+- Vehicle capacity and total CONFIRMED tickets are separate values; do not derive segment availability from their difference.
+
 ## Gotchas
 
-- `src/main.jsx` loads App.jsx, local Geist fonts and styles.css. Stations UI is available at / and /stations.
+- Passenger homepage is `/user/home`, based on Figma 102:3, using scoped `pages/user-home.css` and local Manrope. See `../docs/user-home-module.md`.
+- App.jsx resolves USER/ADMIN routes before rendering, rechecks session on focus/pageshow/visibility, and rejects stale auth responses. `/` resolves by role; unauthenticated visitors go to `/login`.
+- `services/passengerApi.js` uses the existing request helper for read-only passenger APIs; never call ADMIN list endpoints from the passenger homepage.
+
+- `src/main.jsx` loads App.jsx, local Geist fonts and styles.css. Stations UI is at /stations for ADMIN; / redirects according to the authenticated role.
 - `src/services/stationsApi.js` uses fetch with session cookies and X-GoBus-Request. Refresh lists from the API after mutations.
 
 _Drafted by /audit from the repo, worth a quick human pass. Edit freely: once a line stops matching this draft, later runs treat it as curated and will flag rather than overwrite it._

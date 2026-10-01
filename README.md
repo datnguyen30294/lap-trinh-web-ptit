@@ -1,4 +1,9 @@
+> Trang chủ USER theo Figma đã triển khai tại `/user/home`, đăng nhập chung tại `/login`: [hướng dẫn và kiểm chứng](docs/user-home-module.md). Module quản lý lịch trình ở `/schedules`: [hướng dẫn chạy](docs/schedules-module.md), [báo cáo kiểm chứng](docs/schedules-verification.md). Các phần mô tả cũ bên dưới có thể chưa phản ánh ứng dụng hiện tại.
+
 # lap-trinh-web-ptit
+
+Hướng dẫn ứng dụng GoBus hiện tại: [quản lý tuyến và điểm dừng](docs/routes-module.md), [quản lý bến](docs/stations-module.md), [kết quả kiểm chứng tuyến](docs/routes-verification.md). Frontend hiện dùng React JavaScript và Vite; backend NestJS TypeScript, xác thực session ADMIN.
+
 tất cả về môn lâoj trình web thầy Trần Quý Nam
 # Bo-stack
 Front-end: React + TypeScript

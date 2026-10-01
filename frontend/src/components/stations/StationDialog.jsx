@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react';
 
-export default function StationDialog({ title, onClose, busy, children }) {
+export default function StationDialog({
+  title,
+  onClose,
+  busy,
+  children,
+  className = '',
+}) {
   const ref = useRef(null);
   useEffect(() => {
     const dialog = ref.current;
@@ -31,7 +37,7 @@ export default function StationDialog({ title, onClose, busy, children }) {
   return (
     <dialog
       ref={ref}
-      className="station-dialog"
+      className={`station-dialog ${className}`}
       aria-labelledby="dialog-title"
       onKeyDown={trapFocus}
       onCancel={(event) => {

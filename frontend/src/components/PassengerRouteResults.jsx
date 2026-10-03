@@ -1,3 +1,4 @@
+import AppLink from './AppLink';
 import { useEffect, useState } from 'react';
 import StationDialog from './stations/StationDialog';
 import { passengerApi } from '../services/passengerApi';
@@ -29,7 +30,7 @@ export default function PassengerRouteResults({ criteria, onClose }) {
     >
       <p className="dialog-description">
         Tra cứu tuyến đi thẳng theo thứ tự điểm dừng. Giờ hoạt động theo giờ
-        Việt Nam; chưa bao gồm lịch chuyến, bản đồ hoặc đặt vé.
+        Việt Nam. Chọn chuyến xe để xem giờ chạy và đặt vé trên chặng này.
       </p>
       {state.loading && <p role="status">Đang tìm tuyến xe…</p>}
       {state.error && (
@@ -83,6 +84,12 @@ export default function PassengerRouteResults({ criteria, onClose }) {
                     </li>
                   ))}
                 </ol>
+                <AppLink
+                  className="home-button"
+                  href={`/user/bookings?${new URLSearchParams({ route: route.id, from: criteria.from_station_id || route.stops[0].station_id, to: criteria.to_station_id || route.stops.at(-1).station_id })}`}
+                >
+                  Chọn chuyến xe
+                </AppLink>
               </article>
             ))}
           </div>

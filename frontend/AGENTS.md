@@ -43,6 +43,9 @@ npm test
 
 ## Gotchas
 
+- Passenger bookings use `/user/bookings`, `/user/bookings/new`, `/user/bookings/success`, `/user/tickets` and `/user/tickets/:id`. Scoped `pages/bookings.css` and BookingLayout use local Manrope; `services/bookingsApi.js` reuses the existing request helper.
+- Each ticket has separate passenger fields; reuse a request UUID when retrying unchanged booking input. Show receipts from the owned backend endpoint, without payment or email delivery claims.
+
 - Passenger homepage is `/user/home`, based on Figma 102:3, using scoped `pages/user-home.css` and local Manrope. See `../docs/user-home-module.md`.
 - App.jsx resolves USER/ADMIN routes before rendering, rechecks session on focus/pageshow/visibility, and rejects stale auth responses. `/` resolves by role; unauthenticated visitors go to `/login`.
 - `services/passengerApi.js` uses the existing request helper for read-only passenger APIs; never call ADMIN list endpoints from the passenger homepage.

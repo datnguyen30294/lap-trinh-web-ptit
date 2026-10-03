@@ -1,3 +1,4 @@
+import AppLink from '../components/AppLink';
 import { useEffect, useRef, useState } from 'react';
 import '@fontsource-variable/manrope';
 import { passengerApi } from '../services/passengerApi';
@@ -86,24 +87,24 @@ export default function UserHomePage({
   }
   return (
     <div className="user-home" data-figma-node="102:3">
-      <a className="skip-link" href="#user-main">
+      <AppLink className="skip-link" href="#user-main">
         Đến nội dung chính
-      </a>
+      </AppLink>
       <div className="home-utility">
         <span>
           <img src={asset('imgBus')} alt="" />
           GoBus - Vì tương lai xanh cho mọi người
         </span>
         <span>
-          <a href="tel:0522077841">
+          <AppLink href="tel:0522077841">
             <img src={asset('imgPhone')} alt="" />
             Hotline: 0522077841
-          </a>
+          </AppLink>
           <img className="home-utility-divider" src={asset('imgLine')} alt="" />
         </span>
       </div>
       <header className="home-header">
-        <a
+        <AppLink
           className="home-brand"
           href="/user/home"
           aria-label="GoBus — Trang chủ"
@@ -113,19 +114,18 @@ export default function UserHomePage({
             <b>DI CHUYỂN XANH</b>
             <small>GoBus ECO-SYSTEM</small>
           </span>
-        </a>
+        </AppLink>
         <nav className="home-nav" aria-label="Điều hướng người dùng">
-          <a href="/user/home" aria-current="page">
+          <AppLink href="/user/home" aria-current="page">
             Trang chủ
-          </a>
+          </AppLink>
           <button onClick={findRoute}>
             Lộ trình &amp; Bản đồ<small>Bản đồ: sắp có</small>
           </button>
-          <button onClick={() => unavailable('Mua vé')}>
-            Mua vé<small>Sắp có</small>
-          </button>
+          <AppLink href="/user/bookings">Mua vé</AppLink>
         </nav>
         <div className="home-account">
+          <AppLink href="/user/tickets">Vé của tôi</AppLink>
           <span title={user.full_name}>{user.full_name}</span>
           <button
             className="home-button"
@@ -141,7 +141,7 @@ export default function UserHomePage({
           {logoutError}
         </div>
       )}
-      <main id="user-main">
+      <main id="user-main" tabIndex={-1}>
         <section className="home-hero" aria-labelledby="home-title">
           <img
             className="home-hero-image"
@@ -296,12 +296,9 @@ export default function UserHomePage({
               </button>
             </form>
             <div className="home-hero-actions">
-              <button
-                className="home-button"
-                onClick={() => unavailable('Đặt vé trực tuyến')}
-              >
-                Đặt vé ngay <small>Sắp có</small>
-              </button>
+              <AppLink className="home-button" href="/user/bookings">
+                Đặt vé ngay
+              </AppLink>
               <button
                 className="home-button home-button-outline"
                 onClick={findRoute}
@@ -337,10 +334,10 @@ export default function UserHomePage({
       <footer className="home-footer">
         <div className="home-footer-columns">
           <div className="home-company">
-            <a className="home-brand" href="/user/home">
+            <AppLink className="home-brand" href="/user/home">
               <strong className="home-logo">GoBus</strong>
               <b>DI CHUYỂN XANH</b>
-            </a>
+            </AppLink>
             <div>
               <p>
                 Công ty TNHH Dịch vụ Vận tải Sinh thái GoBus - Thành viên của

@@ -45,6 +45,8 @@ npm run test:e2e
 
 ## Gotchas
 
+- `src/bookings/` owns passenger trip search, per passenger booking, receipts, owned ticket detail/QR and cancellation. Booking E2E uses port 3105 and cleans only its fixtures; see `src/bookings/AGENTS.md` and `../docs/bookings-module.md`.
+
 - `src/passenger/` provides authenticated read-only station options and paginated direct-route searches. PassengerGuard rechecks current active USER/ADMIN roles; AdminGuard remains unchanged. No schema migration is needed.
 - Passenger E2E tests use port 3104 and preserve all original rows. See `../docs/user-home-module.md` for scope and verification.
 

@@ -8,6 +8,7 @@ import { RoutesModule } from './routes/routes.module.js';
 import { SchedulesModule } from './schedules/schedules.module.js';
 import { StationsModule } from './stations/stations.module.js';
 import { PassengerModule } from './passenger/passenger.module.js';
+import { BookingsModule } from './bookings/bookings.module.js';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PassengerModule } from './passenger/passenger.module.js';
     RoutesModule,
     SchedulesModule,
     PassengerModule,
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

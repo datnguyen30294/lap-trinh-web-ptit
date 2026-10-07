@@ -22,6 +22,9 @@ vi.mock('./pages/UserHomePage', () => ({
 vi.mock('./pages/StationsPage', () => ({
   default: () => <h1>Danh sách bến xe</h1>,
 }));
+vi.mock('./pages/JourneyPlannerPage', () => ({
+  default: () => <h1>Trang lộ trình riêng</h1>,
+}));
 vi.mock('./pages/RoutesPage', () => ({
   default: () => <h1>Danh sách tuyến xe</h1>,
 }));
@@ -47,6 +50,19 @@ async function submitLogin() {
   );
 }
 describe('Authentication and role navigation', () => {
+  it.each(['USER', 'ADMIN'])(
+    'opens the independent journey planner for %s',
+    async (role) => {
+      authApi.me.mockResolvedValue({ ...user, role });
+      window.history.replaceState(null, '', '/user/journey-planner');
+      render(<App />);
+      await screen.findByRole('heading', { name: 'Trang lộ trình riêng' });
+      expect(window.location.pathname).toBe('/user/journey-planner');
+      expect(
+        screen.queryByRole('navigation', { name: 'Quản trị' }),
+      ).not.toBeInTheDocument();
+    },
+  );
   it.each(['/', '/login', '/stations', '/routes', '/schedules', '/user/home'])(
     'restores USER at %s without rendering administration',
     async (path) => {

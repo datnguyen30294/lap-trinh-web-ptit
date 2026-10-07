@@ -45,6 +45,8 @@ npm run test:e2e
 
 ## Gotchas
 
+- `src/journey-planner/geocoding.service.ts` proxies explicit Hanoi address searches with PassengerGuard, bounded results, cache and a single process request queue. Default Nominatim needs no key; `NOMINATIM_SEARCH_URL` optionally changes provider. Do not call public Nominatim on every keystroke. Tracking accepts optional `origin_label` for session restoration; see `../docs/journey-origin.md`.
+
 - `src/passenger/` provides authenticated read-only station options and paginated direct-route searches. PassengerGuard rechecks current active USER/ADMIN roles; AdminGuard remains unchanged. No schema migration is needed.
 - Passenger E2E tests use port 3104 and preserve all original rows. See `../docs/user-home-module.md` for scope and verification.
 

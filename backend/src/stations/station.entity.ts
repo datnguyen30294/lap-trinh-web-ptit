@@ -27,6 +27,12 @@ export class Station {
   })
   address: string;
 
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  latitude: string | null;
+
+  @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
+  longitude: string | null;
+
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 }

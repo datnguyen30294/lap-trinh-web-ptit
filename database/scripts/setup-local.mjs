@@ -77,6 +77,8 @@ try {
     const missing = Object.entries(required).flatMap(([table, names]) => names.map((column) => `${table}.${column}`)).filter((column) => !present.has(column));
     if (missing.length) throw new Error(`Database ${name} đã tồn tại nhưng thiếu: ${missing.join(', ')}. Không sửa hoặc nạp seed vào database này. Nếu đây là bản ERD cũ, giữ lại nó và đặt DB_NAME=gobus_hanoi_student (hoặc tên mới chưa có dữ liệu), rồi chạy lại. Xem hướng dẫn cho database đã tồn tại.`);
     console.log(`Database ${name} đã tương thích: giữ nguyên schema và dữ liệu, không chạy lại seed.`);
+    if (!present.has('routes.geometry'))
+      console.log('Bản đồ cần nâng cấp database cũ: chạy migration 006 (nếu thiếu tọa độ), rồi node database/migrations/007-route-geometry.mjs sau khi cài backend.');
   } else {
     rootSql(`CREATE DATABASE IF NOT EXISTS \`${name}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`);
     for (const file of ['01-schema.sql', '02-seed-hanoi.sql', '03-views.sql']) {

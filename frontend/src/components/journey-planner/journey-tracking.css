@@ -1,0 +1,97 @@
+.jp-tracking-panel h1 {
+  font-size: 24px;
+  line-height: 1.35;
+}
+.jp-tracking-subtitle,
+.jp-tracking-dropoff {
+  font-size: 12px;
+  color: var(--jp-muted);
+  line-height: 1.6;
+  margin: 8px 0;
+}
+.jp-tracking-step {
+  padding: 16px;
+  margin-top: 10px;
+  background: #e7f5ee;
+  border-radius: 12px;
+}
+.jp-tracking-step strong {
+  font-size: 12px;
+  color: var(--jp-accent);
+  text-transform: uppercase;
+}
+.jp-tracking-step p {
+  font-size: 12px;
+  color: var(--jp-muted);
+  line-height: 1.6;
+  margin: 8px 0 0;
+}
+.jp-tracking-estimate {
+  display: grid;
+  gap: 10px;
+  border-radius: 12px;
+  background: white;
+  padding: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+.jp-tracking-estimate p,
+.jp-tracking-estimate small {
+  color: var(--jp-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+.jp-tracking-estimate .jp-tracking-minutes {
+  font-size: 26px;
+  color: var(--jp-accent);
+}
+.jp-tracking-arrival {
+  border-top: 1px solid var(--jp-line);
+  padding-top: 10px;
+  font-size: 14px;
+}
+.jp-end-dialog {
+  width: min(380px, calc(100vw - 32px));
+  padding: 20px;
+  color: #163e32;
+  font-family: 'Manrope Variable', sans-serif;
+  --jp-accent: #008b4b;
+  --jp-accent-dark: #006a39;
+  --jp-line: #dce5df;
+  --jp-ink: #163e32;
+}
+.jp-end-dialog::backdrop {
+  background: #16302b66;
+}
+.jp-end-dialog .dialog-heading h2 {
+  font-size: 16px;
+}
+.jp-end-dialog > p {
+  margin: 12px 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.jp-end-summary {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f1f5f3;
+  font-size: 12px;
+}
+.jp-end-summary span {
+  justify-self: start;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: #008b4b;
+  color: white;
+  font-size: 10px;
+}
+.jp-end-summary small {
+  color: #60776f;
+  line-height: 1.6;
+}
+.jp-detail-actions button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}

@@ -10,6 +10,7 @@ import RoutesPage from './pages/RoutesPage';
 import StationsPage from './pages/StationsPage';
 import LoginPage from './pages/LoginPage';
 import UserHomePage from './pages/UserHomePage';
+import JourneyPlannerPage from './pages/JourneyPlannerPage';
 import { authApi } from './services/stationsApi';
 import {
   adminPaths,
@@ -151,7 +152,11 @@ export default function App() {
         </button>
       </main>
     );
-  if (destination !== '/user/home' && !adminPaths.includes(destination))
+  if (
+    destination !== '/user/home' &&
+    destination !== '/user/journey-planner' &&
+    !adminPaths.includes(destination)
+  )
     return (
       <main className="app-state">
         <h1>Không tìm thấy trang</h1>
@@ -160,6 +165,15 @@ export default function App() {
           Về trang chủ
         </a>
       </main>
+    );
+  if (destination === '/user/journey-planner')
+    return (
+      <JourneyPlannerPage
+        user={user}
+        onLogout={logout}
+        logoutBusy={logoutBusy}
+        logoutError={logoutError}
+      />
     );
   if (user.role === 'USER')
     return (

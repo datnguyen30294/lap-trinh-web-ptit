@@ -13,7 +13,7 @@ React JSX và CSS thuần, NestJS với TypeORM, MySQL hiện tại có một h�
 
 ## Requirements
 
-- AC-1: USER chọn điểm đi, điểm đến và ngày Việt Nam để xem chuyến thật, giá và số chỗ trên chặng. Có loading, lỗi, trống và phân trang.
+- AC-1: USER gõ tên hoặc mã bến để chọn điểm đi, điểm đến từ gợi ý trong database và chọn ngày Việt Nam để xem chuyến thật, giá và số chỗ trên chặng. Hỗ trợ chữ không dấu, bàn phím và kiểm tra bến đã chọn. Có loading, lỗi, trống và phân trang.
 - AC-2: Trang xác nhận theo Figma 96:149. Số vé điều khiển số form hành khách, mỗi form có tên và điện thoại riêng. Đơn hàng tính đúng giá backend nhân số vé.
 - AC-3: Đặt nhiều vé là một transaction. Tạo mỗi hành khách một hàng bookings. Không vượt sức chứa trên bất kỳ đoạn con nào. Gửi lại cùng request không tạo thêm vé.
 - AC-4: Thành công theo 105:237, có tổng tiền đặt, từng mã vé và liên kết xem vé. Không nói đã thanh toán hoặc gửi email.
@@ -77,6 +77,7 @@ Cancel khóa schedule rồi booking, không khóa lại cha, không xóa vé. Cu
 ### UI và routing
 
 - /user/bookings: tìm chuyến; tận dụng cấu trúc thẻ trắng và bộ lọc hiện có.
+- Bổ sung ngày 07/10/2026 theo yêu cầu người dùng: hai ô bến dùng StationAutocomplete, nhận danh sách từ GET /passenger/stations. Lọc tại frontend theo các từ trong tên hoặc mã bến, không phân biệt dấu và chữ hoa. Chọn gợi ý bằng chuột hoặc phím lên/xuống và Enter; Escape hoặc rời ô đóng danh sách. Khi sửa chữ, xóa ID đã chọn và yêu cầu chọn lại bến hợp lệ. Danh sách cuộn trong khung, dùng được trên mobile. Giữ nguyên backend và schema; không gọi Google Maps.
 - /user/bookings/new?trip=...&from=...&to=...: header 88px, lề desktop 80px, quay lại tìm chuyến, tiêu đề, cột 760px và 380px, gap 32px; thẻ 32px padding, radius 20px.
 - /user/bookings/success?request=...: xác nhận ở giữa, thẻ 520px, các mã vé riêng, nút vé của tôi và trang chủ. GET /bookings/receipt/:requestId đọc toàn bộ vé của lần đặt thuộc user trong một truy vấn.
 - /user/tickets và /user/tickets/:id: danh sách và chi tiết, toàn bộ trạng thái Figma đã chọn.

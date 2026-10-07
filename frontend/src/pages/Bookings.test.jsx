@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BookingPage from './BookingPage';
 import BookingSearchPage from './BookingSearchPage';
@@ -142,11 +142,13 @@ describe('Passenger booking screens', () => {
       'Máy chủ đang gặp sự cố',
     );
     await actor.click(screen.getByRole('button', { name: 'Thử tải lại bến' }));
-    await within(screen.getByLabelText('Điểm đi *')).findByRole('option', {
-      name: 'Bến đầu',
-    });
-    await actor.selectOptions(screen.getByLabelText('Điểm đi *'), '1');
-    await actor.selectOptions(screen.getByLabelText('Điểm đến *'), '1');
+    await waitFor(() =>
+      expect(screen.getByLabelText('Điểm đi *')).toBeEnabled(),
+    );
+    await actor.click(screen.getByLabelText('Điểm đi *'));
+    await actor.click(screen.getByRole('option', { name: 'Bến đầu' }));
+    await actor.click(screen.getByLabelText('Điểm đến *'));
+    await actor.click(screen.getByRole('option', { name: 'Bến đầu' }));
     await actor.click(screen.getByRole('button', { name: 'Tìm chuyến xe' }));
     expect(screen.getByRole('alert')).toHaveTextContent('phải khác nhau');
     expect(
@@ -154,6 +156,43 @@ describe('Passenger booking screens', () => {
         url.includes('/passenger/stations'),
       ),
     ).toBe(true);
+  });
+  it('AC-1 suggests API stations without extra requests and searches with their IDs', async () => {
+    window.history.replaceState(null, '', '/user/bookings');
+    const actor = userEvent.setup();
+    const stations = [
+      { id: '5', code: 'BX-YN', name: 'Bến xe Yên Nghĩa' },
+      { id: '3', code: 'NTS', name: 'Ngã Tư Sở' },
+    ];
+    fetchMock.mockImplementation((url) =>
+      response(
+        url.includes('/passenger/stations')
+          ? stations
+          : { items: [], total: 0, totalPages: 0 },
+      ),
+    );
+    render(<BookingSearchPage />);
+    const from = screen.getByRole('combobox', { name: 'Điểm đi *' });
+    const to = screen.getByRole('combobox', { name: 'Điểm đến *' });
+    await waitFor(() => expect(from).toBeEnabled());
+    await actor.type(from, 'yen nghia');
+    await actor.click(screen.getByRole('option', { name: /Bến xe Yên Nghĩa/ }));
+    await actor.type(to, 'nga tu so');
+    await actor.keyboard('{Enter}');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await actor.click(screen.getByRole('button', { name: 'Tìm chuyến xe' }));
+    await screen.findByText(/Không có chuyến phù hợp/);
+    const params = new URL(fetchMock.mock.calls[1][0], 'http://localhost')
+      .searchParams;
+    expect(params.get('from_station_id')).toBe('5');
+    expect(params.get('to_station_id')).toBe('3');
+
+    // Sửa tên đã chọn phải chọn lại gợi ý, không gửi ID cũ hoặc chữ tự nhập.
+    await actor.clear(from);
+    await actor.type(from, 'Địa điểm chưa có trong database');
+    await actor.click(screen.getByRole('button', { name: 'Tìm chuyến xe' }));
+    expect(from).toBeInvalid();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
   it('AC-4 shows the actual receipt without claiming payment or email delivery', async () => {
     window.history.replaceState(

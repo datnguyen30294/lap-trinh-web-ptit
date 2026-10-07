@@ -30,7 +30,7 @@ Backend dùng PORT trong `.env`, hiện là 3001. Frontend chuyển `/api` tới
 
 ## Sử dụng
 
-1. Chọn bến đi, bến đến và ngày. Chuyến phải chưa khởi hành, tuyến và các bến đang hoạt động.
+1. Gõ tên hoặc mã bến ở Điểm đi và Điểm đến, rồi chọn một gợi ý và ngày đi. Có thể gõ không dấu, ví dụ `yen nghia`, hoặc dùng phím lên/xuống và Enter. Gợi ý lấy từ các bến thuộc tuyến hoạt động trong MySQL qua API, không phải dữ liệu Google Maps. Chuyến phải chưa khởi hành, tuyến và các bến đang hoạt động.
 2. Chọn chuyến, tăng hoặc giảm số vé. Nhập tên và số điện thoại riêng cho từng hành khách.
 3. Xác nhận đặt vé. Trang thành công đọc lại toàn bộ vé từ MySQL bằng mã lần đặt, hiển thị tổng tiền và từng liên kết vé.
 4. Mở Vé của tôi để lọc trạng thái và xem chi tiết. QR được tạo tại backend, chỉ chứa mã vé.
@@ -48,6 +48,7 @@ Nếu không có chuyến trong ngày, chọn một ngày còn lịch hoặc th�
 | `backend/src/bookings/bookings.controller.ts` | Các API đặt vé |
 | `backend/src/bookings/bookings.service.ts` | Đọc MySQL, tính giá và chỗ, transaction đặt và hủy |
 | `frontend/src/pages/BookingSearchPage.jsx` | Tìm chuyến |
+| `frontend/src/components/bookings/StationAutocomplete.jsx` | Gợi ý bến theo tên hoặc mã, hỗ trợ không dấu và bàn phím |
 | `frontend/src/pages/BookingPage.jsx` | Form hành khách và tổng tiền |
 | `frontend/src/pages/BookingSuccessPage.jsx` | Kết quả lần đặt |
 | `frontend/src/pages/MyTicketsPage.jsx` | Danh sách và bộ lọc |
@@ -104,3 +105,9 @@ Công cụ trình duyệt trả lỗi `Unable to capture screenshot`, nên chưa
 Frontend build và lint đã qua, 65 kiểm tra trong 8 suite đều qua. Kiểm thử tải chậm tái hiện danh sách bị xóa trước bản sửa, sau bản sửa giữ nguyên danh sách và bỏ qua phản hồi của bộ lọc cũ. Kiểm thử App xác nhận từ trang chủ sang Mua vé, giữa các trang vé, đổi query chuyến và hiển thị kết quả đặt vé mà không tải lại phiên đăng nhập.
 
 Đã kiểm tra trên Edge với dữ liệu thật: danh sách Tất cả, đổi sang Đã đặt, Hoàn thành và Đã hủy, sau đó chuyển về trang chủ. Trong lúc tải, khung vé cũ vẫn hiện cùng thông báo cập nhật; vị trí tiêu đề và bộ lọc giữ nguyên. Không đo FPS. Không tạo hoặc hủy vé trong lượt kiểm tra chuyển động này.
+
+### Kiểm tra gợi ý bến ngày 07/10/2026
+
+Frontend build và lint đã qua, 71 kiểm tra trong 9 suite đều qua. `StationAutocomplete.test.jsx` kiểm tra tìm không dấu, tên và mã bến, chọn bằng chuột hoặc bàn phím, đóng danh sách, sửa lựa chọn và nhận ID có sẵn khi API tải xong. `Bookings.test.jsx` xác nhận tìm chuyến bằng ID đã chọn, không gọi API thêm mỗi lần gõ và không gửi tên tự nhập chưa được chọn.
+
+Đã thử trên Edge với MySQL thật: gõ `yen nghia` và `nga tu so`, chọn gợi ý, tìm thấy chuyến 470 cho ngày 07/10/2026 lúc 21:00, còn 60 chỗ, giá 10.500 đ. Danh sách vừa chiều rộng màn hình CSS 375px và cuộn đến mục cuối khi dùng phím lên. Console không có lỗi trong lượt kiểm tra. Chỉ tìm chuyến, không tạo hoặc hủy vé, không đổi dữ liệu hay volume Docker.

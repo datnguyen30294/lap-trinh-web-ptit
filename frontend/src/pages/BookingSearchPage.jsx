@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { passengerApi } from '../services/passengerApi';
 import { bookingsApi } from '../services/bookingsApi';
 import BookingResults from '../components/bookings/BookingResults';
+import StationAutocomplete from '../components/bookings/StationAutocomplete';
 import {
   money,
   searchParams,
@@ -55,6 +56,18 @@ export default function BookingSearchPage() {
   }, [criteria, page, attempt]);
   function search(event) {
     event.preventDefault();
+    if (
+      ![form.from_station_id, form.to_station_id].every((id) =>
+        stations.some((station) => station.id === id),
+      )
+    ) {
+      setState({
+        loading: false,
+        data: null,
+        error: 'Vui lòng chọn điểm đi và điểm đến trong danh sách gợi ý.',
+      });
+      return;
+    }
     if (form.from_station_id === form.to_station_id) {
       setState({
         loading: false,
@@ -87,24 +100,20 @@ export default function BookingSearchPage() {
           ['from_station_id', 'Điểm đi'],
           ['to_station_id', 'Điểm đến'],
         ].map(([field, label]) => (
-          <label className="booking-field" key={field}>
-            <span>{label} *</span>
-            <select
-              required
-              value={form[field]}
-              onChange={(event) =>
-                setForm({ ...form, [field]: event.target.value, route_id: '' })
-              }
-              disabled={!stations.length}
-            >
-              <option value="">Chọn {label.toLowerCase()}</option>
-              {stations.map((station) => (
-                <option key={station.id} value={station.id}>
-                  {station.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <StationAutocomplete
+            key={field}
+            label={label}
+            stations={stations}
+            value={form[field]}
+            onChange={(id) =>
+              setForm((previous) => ({
+                ...previous,
+                [field]: id,
+                route_id: '',
+              }))
+            }
+            disabled={!stations.length}
+          />
         ))}
         <label className="booking-field">
           <span>Ngày đi *</span>

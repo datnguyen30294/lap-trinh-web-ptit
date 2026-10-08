@@ -1,0 +1,21 @@
+[
+  { "code": "HN-BC", "latitude": 21.02219, "longitude": 105.86120, "source": "https://mapcarta.com/N7589589146" },
+  { "code": "HN-TT", "latitude": 21.02655, "longitude": 105.84968, "source": "https://mapcarta.com/N4292651591" },
+  { "code": "HN-NTS", "latitude": 21.00328, "longitude": 105.82002, "source": "https://vn.geoview.info/ham_uong_bo_nga_tu_so,10330602536w" },
+  { "code": "HN-PTIT", "latitude": 20.98096, "longitude": 105.78708, "source": "https://mapcarta.com/W480680319" },
+  { "code": "HN-YN", "latitude": 20.95009, "longitude": 105.74726, "source": "https://mapcarta.com/W595927159" },
+  { "code": "HN-MD", "latitude": 20.98333, "longitude": 105.86305, "source": "https://mapcarta.com/N4272697291" },
+  { "code": "HN-TN", "latitude": 21.00288, "longitude": 105.85918, "source": "https://mapcarta.com/N738814309" },
+  { "code": "HN-CB", "latitude": 21.00658, "longitude": 105.83020, "source": "https://mapcarta.com/N738815806" },
+  { "code": "HN-CG", "latitude": 21.02912, "longitude": 105.80336, "source": "https://mapcarta.com/W207314367" },
+  { "code": "HN-SVD", "latitude": 21.02050, "longitude": 105.76393, "source": "https://mapcarta.com/W533838254" },
+  { "code": "HN-KM", "latitude": 21.03203, "longitude": 105.82938, "source": "https://mapcarta.com/W1218947560" },
+  { "code": "HN-NT", "latitude": 21.02930, "longitude": 105.82670, "source": "https://mapcarta.com/W1234236095" },
+  { "code": "HN-GV", "latitude": 21.02458, "longitude": 105.82105, "source": "https://vn.geoview.info/nha_cho_giang_vo,8237661950n" },
+  { "code": "HN-HDT", "latitude": 21.00464, "longitude": 105.80576, "source": "https://vn.geoview.info/pho_hoang_ao_thuy,10208366141w" },
+  { "code": "HN-TV", "latitude": 20.99069, "longitude": 105.78396, "source": "https://mapcarta.com/W849686733" },
+  { "code": "HN-VP2", "latitude": 20.98482, "longitude": 105.77483, "source": "https://mapcarta.com/N6666528584" },
+  { "code": "HN-VP1", "latitude": 20.98228, "longitude": 105.76979, "source": "https://mapcarta.com/N8237661959" },
+  { "code": "HN-VK", "latitude": 20.97658, "longitude": 105.76223, "source": "https://mapcarta.com/N8237661961" },
+  { "code": "HN-CLK", "latitude": 20.97026, "longitude": 105.75469, "source": "https://mapcarta.com/N8237661963" }
+]

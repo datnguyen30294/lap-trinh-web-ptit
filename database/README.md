@@ -1,5 +1,11 @@
 # Database GoBus — dùng cho ứng dụng hiện tại
 
+Tọa độ các bến demo và cách nâng cấp database đã tồn tại: [station-coordinates.md](station-coordinates.md).
+
+Đường đi của sáu chiều tuyến 02, 26, BRT01 được lưu sẵn trong `routes.geometry` (JSON) và đóng gói ngay trong `02-seed-hanoi.sql`. Máy mới nhập SQL là có đường đi, không cần gọi OSRM hay thêm API key để vẽ tuyến. Đây là đường OSRM driving qua các bến đại diện, không phải dữ liệu tuyến xe buýt chính thức. Xem [bản đồ và cache](../docs/journey-map.md).
+
+Máy đã có database và tọa độ chạy một lần từ root: `node database/migrations/007-route-geometry.mjs`. Nếu chưa có tọa độ, chạy migration 006 trước. Migration 007 sao lưu riêng trong `.local/backups`, thêm cột còn thiếu, chỉ điền tuyến demo khớp tọa độ/thứ tự bến và chưa có geometry. Có thể chạy lại; giữ dữ liệu nghiệp vụ và geometry có sẵn. Không nạp lại seed vào database đang dùng.
+
 Bộ SQL hiện tại khớp NestJS và database `gobus_hanoi_student`: có `vehicles`, `schedules.vehicle_id`, `bookings.passenger_name`. Git chứa cấu trúc và dữ liệu mẫu; không chứa Docker volume, `.env`, tài khoản hoặc dữ liệu riêng trên máy thành viên.
 
 ## Máy mới sau khi clone
@@ -66,7 +72,7 @@ Nếu `.env` đang trỏ tới `gobus_hanoi_erd` và báo thiếu `vehicles`, `v
 
 Lệnh sẽ tạo database ứng dụng riêng ngay trong volume hiện có và cấp quyền cho DB_USER. Đây là khởi tạo dữ liệu demo mới, **không tự chuyển lịch sử hoặc tài khoản từ schema ERD cũ**.
 
-Máy đang dùng database ứng dụng tương thích không cần đổi DB_NAME hay chạy migration mới. Giữ nguyên dữ liệu đang làm việc. Các migration `004-stations-module.mjs` và `005-routes-module.mjs` chỉ dùng cho bản ứng dụng cũ thiếu cột trạng thái hoặc phút hành trình; chúng không chuyển đổi schema ERD sang schema có vehicles.
+Máy đang dùng database ứng dụng tương thích không cần đổi DB_NAME. Để bổ sung tọa độ cho bến, chạy `node database/migrations/006-station-coordinates.mjs` theo [hướng dẫn](station-coordinates.md); lệnh giữ nguyên dữ liệu đang làm việc. Các migration `004-stations-module.mjs` và `005-routes-module.mjs` chỉ dùng cho bản ứng dụng cũ thiếu cột trạng thái hoặc phút hành trình; chúng không chuyển đổi schema ERD sang schema có vehicles.
 
 Không dùng `docker compose down -v` hoặc xóa database để xử lý lỗi cài đặt. Thay MYSQL_DATABASE/MYSQL_PASSWORD trong Compose không tự sửa dữ liệu/tài khoản đã có trong volume.
 

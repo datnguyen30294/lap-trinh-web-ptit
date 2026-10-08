@@ -118,9 +118,7 @@ export default function UserHomePage({
           <a href="/user/home" aria-current="page">
             Trang chủ
           </a>
-          <button onClick={findRoute}>
-            Lộ trình &amp; Bản đồ<small>Bản đồ: sắp có</small>
-          </button>
+          <a href="/user/journey-planner">Lộ trình &amp; Bản đồ</a>
           <button onClick={() => unavailable('Mua vé')}>
             Mua vé<small>Sắp có</small>
           </button>

@@ -43,6 +43,9 @@ npm test
 
 ## Gotchas
 
+- Journey Planner origin input is `components/journey-planner/OriginAutocomplete.jsx`: database station suggestions debounce 400 ms; free addresses require Enter or Search through `services/geocodingService.js`. Public Nominatim must not be used for autocomplete. Editing A invalidates its coordinates and previous journeys; see `../docs/journey-origin.md`.
+- JourneySidebar owns both A and B inputs. `PlaceAutocomplete.jsx` searches destination stations in the sidebar; JourneyPlannerPage owns the selection and passes `onDestinationSelect`/`onDestinationClear`. Keep the map free of duplicate search inputs and render selected destination names from props after sidebar remounts.
+
 - Passenger homepage is `/user/home`, based on Figma 102:3, using scoped `pages/user-home.css` and local Manrope. See `../docs/user-home-module.md`.
 - App.jsx resolves USER/ADMIN routes before rendering, rechecks session on focus/pageshow/visibility, and rejects stale auth responses. `/` resolves by role; unauthenticated visitors go to `/login`.
 - `services/passengerApi.js` uses the existing request helper for read-only passenger APIs; never call ADMIN list endpoints from the passenger homepage.

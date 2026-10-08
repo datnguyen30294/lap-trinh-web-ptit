@@ -1,0 +1,132 @@
+.jp-map-shell {
+  position: absolute;
+  inset: 0;
+}
+.jp-map-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  z-index: 0;
+  background: #e8eee9;
+  font-family: inherit;
+}
+.jp-map-actions {
+  position: absolute;
+  z-index: 2;
+  top: 24px;
+  right: 16px;
+  display: grid;
+  gap: 8px;
+}
+.jp-map-actions button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--jp-line);
+  border-radius: 5px;
+  background: white;
+  color: var(--jp-ink);
+  box-shadow: 0 1px 5px #0002;
+}
+.jp-map-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.jp-map-canvas .leaflet-top.leaflet-right {
+  top: 108px;
+  right: 6px;
+}
+.jp-map-canvas .leaflet-control-zoom a {
+  color: var(--jp-ink);
+}
+.jp-map-canvas .leaflet-control-attribution {
+  font-size: 10px;
+}
+.jp-map-marker {
+  display: grid;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #008b4b;
+  color: white;
+  font-weight: 800;
+  box-shadow: 0 2px 6px #0004;
+}
+.jp-map-marker-b {
+  background: #d54b50;
+}
+.jp-map-messages {
+  position: absolute;
+  z-index: 2;
+  top: 92px;
+  left: 24px;
+  max-width: min(380px, calc(100% - 96px));
+  display: grid;
+  gap: 8px;
+}
+.jp-map-message {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--jp-line);
+  border-radius: 8px;
+  background: #fffffff5;
+  font-size: 12px;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px #0001;
+}
+.jp-map-message button {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--jp-line);
+  border-radius: 5px;
+  background: white;
+  color: var(--jp-accent-dark);
+}
+.jp-map-legend {
+  position: absolute;
+  z-index: 1;
+  bottom: 28px;
+  left: 24px;
+  right: 65px;
+  width: fit-content;
+  max-width: calc(100% - 89px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  background: #fffffff2;
+  font-size: 10px;
+  color: var(--jp-ink);
+}
+.jp-map-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.jp-map-legend i {
+  display: inline-block;
+  width: 20px;
+  border-top: 3px solid #2474db;
+}
+.jp-map-legend .jp-legend-walk {
+  border-top: 2px dashed #687c74;
+}
+.jp-map-legend small {
+  flex-basis: 100%;
+  line-height: 1.5;
+}
+.jp-search-area > .jp-autocomplete {
+  width: min(560px, calc(100% - 60px));
+  z-index: 3;
+}
+@media (max-width: 640px) {
+  .jp-map-canvas {
+    min-height: 440px;
+  }
+  .jp-map-legend {
+    left: 12px;
+  }
+}

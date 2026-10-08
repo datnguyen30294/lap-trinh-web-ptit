@@ -1,0 +1,43 @@
+export type Trip = {
+  id: string;
+  route_id: string;
+  route_code: string;
+  route_name: string;
+  from_station_id: string;
+  to_station_id: string;
+  from_station: string;
+  to_station: string;
+  pickup_at: string;
+  dropoff_at: string;
+  departure_at: string;
+  vehicle_code: string;
+  capacity: number;
+  remaining: number;
+  unit_price: number;
+};
+
+export type Ticket = {
+  id: string;
+  booking_code: string;
+  user_id: string;
+  schedule_id: string;
+  from_station_id: string;
+  to_station_id: string;
+  passenger_name: string;
+  contact_phone: string;
+  email: string;
+  unit_price: number;
+  status: 'CONFIRMED' | 'CANCELLED';
+  display_status: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  route_code: string;
+  route_name: string;
+  from_station: string;
+  to_station: string;
+  vehicle_code: string;
+  capacity: number;
+  pickup_at: string | null;
+  dropoff_at: string | null;
+  cancelled_at: string | null;
+  booked_at: string;
+  can_cancel: boolean;
+};

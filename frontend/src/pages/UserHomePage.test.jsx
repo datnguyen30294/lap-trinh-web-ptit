@@ -109,13 +109,21 @@ describe('Passenger homepage', () => {
       await screen.findByText(/Không tìm thấy tuyến đi thẳng phù hợp/),
     ).toBeVisible();
   });
-  it('shows explicit upcoming state for booking and supports dismissing its dialog', async () => {
+  it('opens booking links and keeps an upcoming dialog for unfinished features', async () => {
     render(<UserHomePage {...props} />);
+    expect(screen.getByRole('link', { name: 'Đặt vé ngay' })).toHaveAttribute(
+      'href',
+      '/user/bookings',
+    );
+    expect(screen.getByRole('link', { name: 'Vé của tôi' })).toHaveAttribute(
+      'href',
+      '/user/tickets',
+    );
     await userEvent.click(
-      screen.getByRole('button', { name: 'Đặt vé ngay Sắp có' }),
+      screen.getByRole('button', { name: 'Facebook — sắp có' }),
     );
     expect(screen.getByRole('dialog')).toHaveAccessibleName(
-      'Đặt vé trực tuyến — Sắp có',
+      'Facebook — Sắp có',
     );
     await userEvent.click(screen.getByRole('button', { name: 'Đã hiểu' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

@@ -8,6 +8,7 @@ import { RoutesModule } from './routes/routes.module.js';
 import { SchedulesModule } from './schedules/schedules.module.js';
 import { StationsModule } from './stations/stations.module.js';
 import { PassengerModule } from './passenger/passenger.module.js';
+import { BookingsModule } from './bookings/bookings.module.js';
 import { JourneyPlannerModule } from './journey-planner/journey-planner.module.js';
 
 @Module({
@@ -38,6 +39,7 @@ import { JourneyPlannerModule } from './journey-planner/journey-planner.module.j
     RoutesModule,
     SchedulesModule,
     PassengerModule,
+    BookingsModule,
     JourneyPlannerModule,
   ],
   controllers: [AppController],

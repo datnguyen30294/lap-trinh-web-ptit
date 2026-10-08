@@ -10,11 +10,18 @@ import RoutesPage from './pages/RoutesPage';
 import StationsPage from './pages/StationsPage';
 import LoginPage from './pages/LoginPage';
 import UserHomePage from './pages/UserHomePage';
+import BookingLayout from './components/bookings/BookingLayout';
+import BookingSearchPage from './pages/BookingSearchPage';
+import BookingPage from './pages/BookingPage';
+import BookingSuccessPage from './pages/BookingSuccessPage';
+import MyTicketsPage from './pages/MyTicketsPage';
+import TicketDetailPage from './pages/TicketDetailPage';
 import JourneyPlannerPage from './pages/JourneyPlannerPage';
 import { authApi } from './services/stationsApi';
 import {
   adminPaths,
   currentPath,
+  currentLocation,
   homePath,
   navigate,
   resolvePath,
@@ -22,7 +29,8 @@ import {
 } from './utils/navigation';
 
 export default function App() {
-  const path = useSyncExternalStore(subscribePath, currentPath);
+  const location = useSyncExternalStore(subscribePath, currentLocation);
+  const path = location.split('?')[0];
   const initialAdminPath = useRef(
     adminPaths.includes(currentPath()) ? currentPath() : null,
   );
@@ -58,7 +66,7 @@ export default function App() {
               : previous.message,
         }));
       });
-  }, []);
+  }, [setSession]);
   useEffect(() => {
     loadSession();
     function expired() {
@@ -91,6 +99,20 @@ export default function App() {
     if (!session.loading && !session.error && destination !== path)
       navigate(destination);
   }, [destination, path, session.loading, session.error]);
+  const passengerReady =
+    !session.loading && !!session.user && path.startsWith('/user/');
+  useEffect(() => {
+    if (!passengerReady) return;
+    const main =
+      document.getElementById('booking-main') ||
+      document.getElementById('user-main');
+    const hashTarget =
+      window.location.hash &&
+      document.getElementById(window.location.hash.slice(1));
+    if (hashTarget) hashTarget.scrollIntoView();
+    else window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    main?.focus({ preventScroll: true });
+  }, [location, passengerReady]);
   function login(user) {
     sessionRequest.current++;
     setLogoutError('');
@@ -151,6 +173,32 @@ export default function App() {
           Đăng xuất
         </button>
       </main>
+    );
+  const bookingPages = {
+    '/user/bookings': ['Đặt vé trực tuyến', <BookingSearchPage />],
+    '/user/bookings/new': ['Xác nhận đặt vé', <BookingPage user={user} />],
+    '/user/bookings/success': ['Đặt vé thành công', <BookingSuccessPage />],
+    '/user/tickets': ['Vé của tôi', <MyTicketsPage />],
+  };
+  const ticketMatch = destination.match(
+    /^\/user\/tickets\/([1-9][0-9]{0,19})$/,
+  );
+  const bookingPage =
+    bookingPages[destination] ||
+    (ticketMatch && ['Chi tiết vé', <TicketDetailPage id={ticketMatch[1]} />]);
+  if (bookingPage)
+    return (
+      <BookingLayout
+        user={user}
+        title={bookingPage[0]}
+        onLogout={logout}
+        logoutBusy={logoutBusy}
+        logoutError={logoutError}
+      >
+        <div key={location} className="booking-view">
+          {bookingPage[1]}
+        </div>
+      </BookingLayout>
     );
   if (
     destination !== '/user/home' &&

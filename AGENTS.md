@@ -35,6 +35,8 @@ Schedule module design is `docs/specs/0003-schedules-management.md`; run and ver
 
 ## Rules
 
+- Passenger booking flow spec: `docs/specs/0005-passenger-bookings.md`; run and verification notes: `docs/bookings-module.md`.
+
 - Passenger homepage and role navigation spec: `docs/specs/0004-user-home.md`; run and verification notes: `docs/user-home-module.md`.
 
 - Read the current code and manifests before changing a feature. The root README and database setup describe the current application stack.
@@ -58,6 +60,7 @@ Schedule module design is `docs/specs/0003-schedules-management.md`; run and ver
 ## Context files
 
 - [backend/AGENTS.md](backend/AGENTS.md) (NestJS API and TypeORM conventions)
+- [backend/src/bookings/AGENTS.md](backend/src/bookings/AGENTS.md) (Passenger booking transactions, ownership and receipts)
 - [frontend/AGENTS.md](frontend/AGENTS.md) (React and Vite workspace)
 - [database/AGENTS.md](database/AGENTS.md) (MySQL schema, seed data, and views)
 

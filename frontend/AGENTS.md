@@ -43,6 +43,8 @@ npm test
 
 ## Gotchas
 
+- Passenger bookings use `/user/bookings`, `/user/bookings/new`, `/user/bookings/success`, `/user/tickets` and `/user/tickets/:id`. Scoped `pages/bookings.css` and BookingLayout use local Manrope; `services/bookingsApi.js` reuses the existing request helper.
+- Each ticket has separate passenger fields; reuse a request UUID when retrying unchanged booking input. Show receipts from the owned backend endpoint, without payment or email delivery claims.
 - Journey Planner origin input is `components/journey-planner/OriginAutocomplete.jsx`: database station suggestions debounce 400 ms; free addresses require Enter or Search through `services/geocodingService.js`. Public Nominatim must not be used for autocomplete. Editing A invalidates its coordinates and previous journeys; see `../docs/journey-origin.md`.
 - JourneySidebar owns both A and B inputs. `PlaceAutocomplete.jsx` searches destination stations in the sidebar; JourneyPlannerPage owns the selection and passes `onDestinationSelect`/`onDestinationClear`. Keep the map free of duplicate search inputs and render selected destination names from props after sidebar remounts.
 

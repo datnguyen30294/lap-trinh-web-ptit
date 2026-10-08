@@ -158,3 +158,5 @@ Tra cứu ngày 27/09/2026. Chỉ sử dụng tên và thứ tự hành lang/đi
 3. [Lotrinh.vn — Tuyến 26](https://lotrinh.vn/tourl/47_Lotrinh_Xe_Bus_Ha_Noi,_Tuyen_26_Mai_Dong_SVD_Quoc_Gia.aspx): hành lang Mai Động, Thanh Nhàn, Chùa Bộc, Cầu Giấy, Sân vận động Quốc gia.
 4. [Moovit — Tuyến 02, danh sách điểm dừng](https://appassets.mvtdev.com/map/176/l/2921/17099497.pdf): điểm Học viện Công nghệ Bưu chính Viễn thông trên Trần Phú.
 5. [Moovit — BRT01 Kim Mã → Yên Nghĩa](https://moovitapp.com/index/vi/ph%C6%B0%C6%A1ng_ti%E1%BB%87n_c%C3%B4ng_c%E1%BB%99ng-time-brt01-H%C3%A0_N%E1%BB%99i-2921-1597502-17099457-9156357-0): thứ tự các nhà chờ BRT tiêu biểu.
+
+Đặc tả cấu trúc, quan hệ, ràng buộc và dữ liệu bản đồ: [Đặc tả CSDL](../docs/specs/0005-database.md).

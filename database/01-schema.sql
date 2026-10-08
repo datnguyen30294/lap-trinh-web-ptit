@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS `stations` (
   `code` varchar(20) NOT NULL,
   `name` varchar(160) NOT NULL,
   `address` varchar(255) NOT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_stations_code` (`code`),
@@ -31,7 +33,8 @@ CREATE TABLE IF NOT EXISTS `stations` (
   CONSTRAINT `chk_stations_active` CHECK ((`is_active` in (0,1))),
   CONSTRAINT `chk_stations_address` CHECK ((char_length(trim(`address`)) > 0)),
   CONSTRAINT `chk_stations_code` CHECK ((char_length(trim(`code`)) > 0)),
-  CONSTRAINT `chk_stations_name` CHECK ((char_length(trim(`name`)) > 0))
+  CONSTRAINT `chk_stations_name` CHECK ((char_length(trim(`name`)) > 0)),
+  CONSTRAINT `chk_stations_coordinates` CHECK (((`latitude` IS NULL AND `longitude` IS NULL) OR (`latitude` IS NOT NULL AND `longitude` IS NOT NULL AND `latitude` BETWEEN -90 AND 90 AND `longitude` BETWEEN -180 AND 180)))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `routes` (
@@ -44,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `routes` (
   `operating_end` time NOT NULL,
   `distance_km` decimal(8,2) NOT NULL,
   `status` enum('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+  `geometry` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_routes_code` (`code`),
   KEY `idx_routes_search` (`origin_station_id`,`destination_station_id`),

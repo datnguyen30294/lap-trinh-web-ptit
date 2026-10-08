@@ -9,6 +9,7 @@ import { SchedulesModule } from './schedules/schedules.module.js';
 import { StationsModule } from './stations/stations.module.js';
 import { PassengerModule } from './passenger/passenger.module.js';
 import { BookingsModule } from './bookings/bookings.module.js';
+import { JourneyPlannerModule } from './journey-planner/journey-planner.module.js';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { BookingsModule } from './bookings/bookings.module.js';
     SchedulesModule,
     PassengerModule,
     BookingsModule,
+    JourneyPlannerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

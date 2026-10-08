@@ -119,9 +119,7 @@ export default function UserHomePage({
           <AppLink href="/user/home" aria-current="page">
             Trang chủ
           </AppLink>
-          <button onClick={findRoute}>
-            Lộ trình &amp; Bản đồ<small>Bản đồ: sắp có</small>
-          </button>
+          <AppLink href="/user/journey-planner">Lộ trình &amp; Bản đồ</AppLink>
           <AppLink href="/user/bookings">Mua vé</AppLink>
         </nav>
         <div className="home-account">

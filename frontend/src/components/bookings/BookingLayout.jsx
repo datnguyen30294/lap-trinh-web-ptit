@@ -34,7 +34,7 @@ export default function BookingLayout({
         </AppLink>
         <nav className="booking-nav" aria-label="Điều hướng hành khách">
           <AppLink href="/user/home">Trang chủ</AppLink>
-          <AppLink href="/user/home#user-main">Lộ trình &amp; Bản đồ</AppLink>
+          <AppLink href="/user/journey-planner">Lộ trình &amp; Bản đồ</AppLink>
           <AppLink href="/user/bookings" aria-current="page">
             Mua vé
           </AppLink>

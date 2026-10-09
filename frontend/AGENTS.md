@@ -49,7 +49,8 @@ npm test
 - JourneySidebar owns both A and B inputs. `PlaceAutocomplete.jsx` searches destination stations in the sidebar; JourneyPlannerPage owns the selection and passes `onDestinationSelect`/`onDestinationClear`. Keep the map free of duplicate search inputs and render selected destination names from props after sidebar remounts.
 
 - Passenger homepage is `/user/home`, based on Figma 102:3, using scoped `pages/user-home.css` and local Manrope. See `../docs/user-home-module.md`.
-- App.jsx resolves USER/ADMIN routes before rendering, rechecks session on focus/pageshow/visibility, and rejects stale auth responses. `/` resolves by role; unauthenticated visitors go to `/login`.
+- App.jsx resolves USER/ADMIN routes before rendering, rechecks session on focus/pageshow/visibility, and rejects stale auth responses. `/` resolves by role; unauthenticated visitors go to `/login` except the public `/register` page.
+- Registration uses Figma 96:28, local Be Vietnam Pro and scoped `pages/register.css`. Require terms_accepted=true and preserve password bytes; login/register callbacks must ignore completion after leaving the page. See `../docs/registration-module.md`.
 - `services/passengerApi.js` uses the existing request helper for read-only passenger APIs; never call ADMIN list endpoints from the passenger homepage.
 
 - `src/main.jsx` loads App.jsx, local Geist fonts and styles.css. Stations UI is at /stations for ADMIN; / redirects according to the authenticated role.

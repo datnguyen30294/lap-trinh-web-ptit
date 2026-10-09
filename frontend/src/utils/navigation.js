@@ -26,10 +26,10 @@ export function pushNavigation(href) {
   window.dispatchEvent(new PopStateEvent('popstate'));
 }
 export function resolvePath(path, user) {
-  if (!user) return '/login';
+  if (!user) return path === '/register' ? '/register' : '/login';
   const home = homePath(user.role);
   if (!home) return path;
-  if (path === '/' || path === '/login') return home;
+  if (path === '/' || path === '/login' || path === '/register') return home;
   if (user.role === 'USER' && adminPaths.includes(path)) return home;
   if (user.role === 'ADMIN' && path === '/user/home') return home;
   return path;

@@ -52,7 +52,8 @@ npm run test:e2e
 - Passenger E2E tests use port 3104 and preserve all original rows. See `../docs/user-home-module.md` for scope and verification.
 
 - `stations.is_active` is mapped; never delete stations. Reject deactivation when an ACTIVE route uses the station as an endpoint or intermediate stop.
-- `src/auth/` authenticates existing users with bcrypt and express-session; AdminGuard reads the current role and active flag from MySQL on every protected request.
+- `src/auth/` supports USER registration and login with bcrypt and express-session; AdminGuard reads the current role and active flag from MySQL on every protected request.
+- Registration accepts only full_name, email, password, confirm_password and terms_accepted=true; role/is_active are server controlled. Preserve the 72 byte UTF-8 password limit and unique email conflict handling. Registration E2E uses port 3107 and cleans only its generated accounts; see `../docs/registration-module.md`.
 - `npm run test:e2e` builds first, requires MySQL and TEST_ADMIN_EMAIL/PASSWORD + TEST_USER_EMAIL/PASSWORD in root .env; station tests start a server on port 3101 and clean only their fixtures.
 
 - Route integration tests use port 3102 and local vehicles schema. E2E suites run sequentially because they checksum the same database; clean only owned fixtures.

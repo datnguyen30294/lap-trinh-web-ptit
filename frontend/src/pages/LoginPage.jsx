@@ -1,23 +1,35 @@
-import { useState } from 'react';
-import { authApi } from '../services/stationsApi';
-export default function LoginPage({ onLogin, message = '' }) {
-  const [error, setError] = useState('');
+import { useEffect, useRef, useState } from "react";
+import { authApi } from "../services/stationsApi";
+import AppLink from "../components/AppLink";
+export default function LoginPage({ onLogin, message = "" }) {
+  const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const mounted = useRef(false);
+  const submitting = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   async function submit(event) {
     event.preventDefault();
+    if (submitting.current) return;
     const data = new FormData(event.currentTarget);
+    submitting.current = true;
     setBusy(true);
-    setError('');
+    setError("");
     try {
-      onLogin(
-        await authApi.login({
-          email: data.get('email'),
-          password: data.get('password'),
-        }),
-      );
+      const user = await authApi.login({
+        email: data.get("email"),
+        password: data.get("password"),
+      });
+      if (mounted.current) onLogin(user);
     } catch (err) {
-      setError(err.message);
-      setBusy(false);
+      if (mounted.current) setError(err.message);
+    } finally {
+      submitting.current = false;
+      if (mounted.current) setBusy(false);
     }
   }
   return (
@@ -43,7 +55,7 @@ export default function LoginPage({ onLogin, message = '' }) {
       <section className="login-panel">
         <form className="login-form" onSubmit={submit}>
           <h2>Đăng nhập GoBus</h2>
-          <p className="muted">Sử dụng tài khoản được cấp trong hệ thống.</p>
+          <p className="muted">Đăng nhập để tiếp tục hành trình cùng GoBus.</p>
           {message && (
             <div className="alert" role="status">
               {message}
@@ -82,10 +94,13 @@ export default function LoginPage({ onLogin, message = '' }) {
             className="button button-primary login-submit"
             disabled={busy}
           >
-            {busy ? 'Đang đăng nhập…' : 'Đăng nhập'}
+            {busy ? "Đang đăng nhập…" : "Đăng nhập"}
           </button>
           <p className="login-help muted">
-            GoBus sẽ đưa bạn đến trang phù hợp với tài khoản của mình.
+            Chưa có tài khoản?{" "}
+            <AppLink href="/register">
+              <strong>Đăng ký ngay</strong>
+            </AppLink>
           </p>
         </form>
       </section>

@@ -71,6 +71,18 @@ export function setupApp(app: INestApplication) {
       },
     }),
   );
+  app.use(
+    '/auth/register',
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      limit: 20,
+      standardHeaders: 'draft-8',
+      legacyHeaders: false,
+      message: {
+        message: 'Bạn đăng ký quá nhiều lần. Vui lòng thử lại sau 15 phút.',
+      },
+    }),
+  );
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

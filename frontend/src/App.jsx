@@ -9,6 +9,7 @@ import SchedulesPage from './pages/SchedulesPage';
 import RoutesPage from './pages/RoutesPage';
 import StationsPage from './pages/StationsPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import UserHomePage from './pages/UserHomePage';
 import BookingLayout from './components/bookings/BookingLayout';
 import BookingSearchPage from './pages/BookingSearchPage';
@@ -161,7 +162,11 @@ export default function App() {
       </main>
     );
   if (!session.user)
-    return <LoginPage message={session.message} onLogin={login} />;
+    return destination === '/register' ? (
+      <RegisterPage onRegister={login} />
+    ) : (
+      <LoginPage message={session.message} onLogin={login} />
+    );
   const user = session.user;
   if (!homePath(user.role))
     return (
@@ -285,14 +290,6 @@ export default function App() {
               <img src="/icons/mappin.svg" alt="" />
               Quản lý bến xe
             </a>
-            <span
-              className="nav-item unavailable"
-              title="Chưa triển khai trong module này"
-              aria-disabled="true"
-            >
-              <img src="/icons/tag.svg" alt="" />
-              Quản lý giá vé
-            </span>
           </nav>
         </aside>
         {schedulesPage ? (

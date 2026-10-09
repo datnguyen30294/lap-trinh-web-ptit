@@ -1,5 +1,9 @@
 # GoBus admin
 
+## Registration
+
+`/register` follows Figma frame 96:28, inspected directly in Chrome. Use local Be Vietnam Pro 400/600/700 and scoped `pages/register.css`: green #1A4033 intro, #1A694D actions, #F7FAF5 canvas, white form card. At 1360×820, header80, intro580×580 at76,160 and card470×650 at790,122. Under800px stack the sections and keep the form fluid. No raster/vector asset is present in this frame; the logo mark is a rounded rectangle. See `../docs/registration-module.md`.
+
 ## Passenger homepage
 
 Figma 102:3 in the same GoBus file is implemented at `/user/home`; its section is 102:2 on page 14:2. Keep its Manrope font, local assets in `public/home/`, and scoped `pages/user-home.css` separate from admin styles. Preserve the original hero, value cards and footer. Replace sample route names with API data and auth actions with the real account. Desktop is the design source; mobile is adapted responsively. Deliberate differences and screenshots: `../docs/user-home-module.md`.

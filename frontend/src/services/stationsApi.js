@@ -46,5 +46,6 @@ export const stationsApi = {
 export const authApi = {
   me: () => request('/auth/me'),
   login: (body) => request('/auth/login', { method: 'POST', body }),
+  register: (body) => request('/auth/register', { method: 'POST', body }),
   logout: () => request('/auth/logout', { method: 'POST' }),
 };

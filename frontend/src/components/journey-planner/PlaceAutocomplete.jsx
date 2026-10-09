@@ -1,10 +1,15 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { journeyPlannerApi } from '../../services/journeyPlannerApi';
 
-export default function PlaceAutocomplete({ selected, onSelect, onClear }) {
+export default function PlaceAutocomplete({
+  selected,
+  onSelect,
+  onClear,
+  initialQuery = '',
+}) {
   const id = useId();
   const inputRef = useRef(null);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [attempt, setAttempt] = useState(0);
@@ -96,7 +101,8 @@ export default function PlaceAutocomplete({ selected, onSelect, onClear }) {
     <div
       className="jp-point-autocomplete"
       onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setOpen(false);
       }}
     >
       <div className="jp-point">

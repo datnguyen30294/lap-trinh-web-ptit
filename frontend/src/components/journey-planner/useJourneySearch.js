@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { journeyPlannerApi } from '../../services/journeyPlannerApi';
 
 const initial = {
@@ -21,38 +21,42 @@ export function useJourneySearch() {
     setState(initial);
   }
 
-  async function search(position, destination, preferredRouteId = null) {
-    pending.current?.abort();
-    const controller = new AbortController();
-    pending.current = controller;
-    setState({ ...initial, status: 'loading' });
-    try {
-      const result = await journeyPlannerApi.search(
-        position,
-        destination.id,
-        controller.signal,
-      );
-      if (controller.signal.aborted) return;
-      setState({
-        ...initial,
-        status: 'success',
-        result,
-        error: '',
-        selectedId: result.items.some(
-          (item) => item.route_id === preferredRouteId,
-        )
-          ? preferredRouteId
-          : null,
-      });
-    } catch (error) {
-      if (controller.signal.aborted) return;
-      setState({
-        ...initial,
-        status: 'error',
-        error: error.message || 'Không tìm được lộ trình. Vui lòng thử lại.',
-      });
-    }
-  }
+  const search = useCallback(
+    async (position, destination, preferredRouteId = null) => {
+      pending.current?.abort();
+      const controller = new AbortController();
+      pending.current = controller;
+      setState({ ...initial, status: 'loading' });
+      try {
+        const result = await journeyPlannerApi.search(
+          position,
+          destination.id,
+          controller.signal,
+        );
+        if (controller.signal.aborted) return;
+        setState({
+          ...initial,
+          status: 'success',
+          result,
+          error: '',
+          selectedId: result.items.some(
+            (item) => item.route_id === preferredRouteId,
+          )
+            ? preferredRouteId
+            : null,
+        });
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setState({
+          ...initial,
+          status: 'error',
+          error:
+            error.message || 'Không tìm được lộ trình. Vui lòng thử lại.',
+        });
+      }
+    },
+    [],
+  );
 
   return {
     ...state,

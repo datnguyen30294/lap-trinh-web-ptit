@@ -13,6 +13,13 @@ import {
 } from '../utils/bookingFormat';
 
 export default function BookingSearchPage() {
+  const [initialQueries] = useState(() => {
+    const params = searchParams();
+    return {
+      from_station_id: params.from_text || '',
+      to_station_id: params.to_text || '',
+    };
+  });
   const [form, setForm] = useState(() => {
     const params = searchParams();
     return {
@@ -28,7 +35,11 @@ export default function BookingSearchPage() {
   const [criteria, setCriteria] = useState(null);
   const [page, setPage] = useState(1);
   const [attempt, setAttempt] = useState(0);
-  const [state, setState] = useState({ loading: false, data: null, error: '' });
+  const [state, setState] = useState({
+    loading: false,
+    data: null,
+    error: '',
+  });
   useEffect(() => {
     const controller = new AbortController();
     passengerApi
@@ -105,6 +116,7 @@ export default function BookingSearchPage() {
             label={label}
             stations={stations}
             value={form[field]}
+            initialQuery={initialQueries[field]}
             onChange={(id) =>
               setForm((previous) => ({
                 ...previous,
@@ -122,7 +134,9 @@ export default function BookingSearchPage() {
             type="date"
             min={vietnamToday()}
             value={form.date}
-            onChange={(event) => setForm({ ...form, date: event.target.value })}
+            onChange={(event) =>
+              setForm({ ...form, date: event.target.value })
+            }
           />
         </label>
         <button
@@ -211,14 +225,19 @@ export default function BookingSearchPage() {
                         Đặt vé
                       </AppLink>
                     ) : (
-                      <span className="booking-status cancelled">Hết chỗ</span>
+                      <span className="booking-status cancelled">
+                        Hết chỗ
+                      </span>
                     )}
                   </div>
                 </article>
               ))}
             </div>
             {state.data.totalPages > 1 && (
-              <nav className="booking-pagination" aria-label="Trang chuyến xe">
+              <nav
+                className="booking-pagination"
+                aria-label="Trang chuyến xe"
+              >
                 <button
                   className="booking-button outline"
                   disabled={page === 1}

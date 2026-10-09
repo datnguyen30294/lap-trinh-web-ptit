@@ -1,9 +1,12 @@
 import AppLink from '../components/AppLink';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { pushNavigation } from '../utils/navigation';
 import '@fontsource-variable/manrope';
 import { passengerApi } from '../services/passengerApi';
 import PassengerRouteResults from '../components/PassengerRouteResults';
 import StationDialog from '../components/stations/StationDialog';
+import StationAutocomplete from '../components/bookings/StationAutocomplete';
+import './bookings.css';
 import './user-home.css';
 
 const asset = (name) => `/home/${name}.svg`;
@@ -40,10 +43,11 @@ export default function UserHomePage({
   const [attempt, setAttempt] = useState(0);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [fromText, setFromText] = useState('');
+  const [toText, setToText] = useState('');
   const [formError, setFormError] = useState('');
   const [criteria, setCriteria] = useState(null);
   const [notice, setNotice] = useState('');
-  const startRef = useRef(null);
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
@@ -69,18 +73,27 @@ export default function UserHomePage({
       });
     return () => controller.abort();
   }, [attempt]);
-  function findRoute() {
-    startRef.current?.scrollIntoView({ block: 'center' });
-    startRef.current?.focus();
+  function selectionLink(path) {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    else if (fromText.trim()) params.set('from_text', fromText);
+    if (to) params.set('to', to);
+    else if (toText.trim()) params.set('to_text', toText);
+    return params.size ? `${path}?${params}` : path;
+  }
+  function validateSelection(event) {
+    if (from && from === to) {
+      event.preventDefault();
+      setFormError('Điểm xuất phát và điểm đến phải khác nhau.');
+      return false;
+    }
+    setFormError('');
+    return true;
   }
   function search(event) {
     event.preventDefault();
-    if (from === to) {
-      setFormError('Điểm xuất phát và điểm đến phải khác nhau.');
-      return;
-    }
-    setFormError('');
-    setCriteria({ from_station_id: from, to_station_id: to });
+    if (validateSelection(event))
+      pushNavigation(selectionLink('/user/journey-planner'));
   }
   function unavailable(label) {
     setNotice(label);
@@ -100,7 +113,11 @@ export default function UserHomePage({
             <img src={asset('imgPhone')} alt="" />
             Hotline: 0522077841
           </AppLink>
-          <img className="home-utility-divider" src={asset('imgLine')} alt="" />
+          <img
+            className="home-utility-divider"
+            src={asset('imgLine')}
+            alt=""
+          />
         </span>
       </div>
       <header className="home-header">
@@ -119,8 +136,18 @@ export default function UserHomePage({
           <AppLink href="/user/home" aria-current="page">
             Trang chủ
           </AppLink>
-          <AppLink href="/user/journey-planner">Lộ trình &amp; Bản đồ</AppLink>
-          <AppLink href="/user/bookings">Mua vé</AppLink>
+          <AppLink
+            href={selectionLink('/user/journey-planner')}
+            onClick={validateSelection}
+          >
+            Lộ trình &amp; Bản đồ
+          </AppLink>
+          <AppLink
+            href={selectionLink('/user/bookings')}
+            onClick={validateSelection}
+          >
+            Mua vé
+          </AppLink>
         </nav>
         <div className="home-account">
           <AppLink href="/user/tickets">Vé của tôi</AppLink>
@@ -175,59 +202,34 @@ export default function UserHomePage({
                 </p>
               </div>
               <div className="home-search-fields">
-                <label className="home-field">
-                  <span>Điểm xuất phát</span>
-                  <span className="home-input">
-                    <img src={asset('imgMapPin')} alt="" />
-                    <select
-                      ref={startRef}
-                      value={from}
-                      onChange={(event) => {
-                        setFrom(event.target.value);
-                        setFormError('');
-                      }}
-                      required
-                      disabled={
-                        catalog.loading ||
-                        !!catalog.error ||
-                        !catalog.stations.length
-                      }
-                    >
-                      <option value="">Nhập vị trí hoặc chọn điểm đi...</option>
-                      {catalog.stations.map((station) => (
-                        <option key={station.id} value={station.id}>
-                          {station.name} ({station.code})
-                        </option>
-                      ))}
-                    </select>
-                  </span>
-                </label>
-                <label className="home-field">
-                  <span>Điểm đến</span>
-                  <span className="home-input">
-                    <img src={asset('imgFlag')} alt="" />
-                    <select
-                      value={to}
-                      onChange={(event) => {
-                        setTo(event.target.value);
-                        setFormError('');
-                      }}
-                      required
-                      disabled={
-                        catalog.loading ||
-                        !!catalog.error ||
-                        !catalog.stations.length
-                      }
-                    >
-                      <option value="">Nhập nơi bạn muốn đến...</option>
-                      {catalog.stations.map((station) => (
-                        <option key={station.id} value={station.id}>
-                          {station.name} ({station.code})
-                        </option>
-                      ))}
-                    </select>
-                  </span>
-                </label>
+                <StationAutocomplete
+                  className="home-station-field"
+                  label="Điểm xuất phát"
+                  placeholder="Nhập vị trí hoặc chọn điểm đi..."
+                  icon={asset('imgMapPin')}
+                  stations={catalog.stations}
+                  value={from}
+                  onChange={setFrom}
+                  onQueryChange={(text) => {
+                    setFromText(text);
+                    setFormError('');
+                  }}
+                  allowFreeText
+                />
+                <StationAutocomplete
+                  className="home-station-field"
+                  label="Điểm đến"
+                  placeholder="Nhập nơi bạn muốn đến..."
+                  icon={asset('imgFlag')}
+                  stations={catalog.stations}
+                  value={to}
+                  onChange={setTo}
+                  onQueryChange={(text) => {
+                    setToText(text);
+                    setFormError('');
+                  }}
+                  allowFreeText
+                />
                 <div className="home-suggestions" aria-label="Tuyến gợi ý">
                   {catalog.loading ? (
                     <span role="status">Đang tải tuyến xe…</span>
@@ -283,26 +285,26 @@ export default function UserHomePage({
                   {formError}
                 </p>
               )}
-              <button
-                className="home-button home-search-submit"
-                disabled={
-                  catalog.loading || !!catalog.error || !catalog.stations.length
-                }
-              >
+              <button className="home-button home-search-submit">
                 <img src={asset('imgSearch')} alt="" />
                 Tìm kiếm lộ trình nhanh
               </button>
             </form>
             <div className="home-hero-actions">
-              <AppLink className="home-button" href="/user/bookings">
+              <AppLink
+                className="home-button"
+                href={selectionLink('/user/bookings')}
+                onClick={validateSelection}
+              >
                 Đặt vé ngay
               </AppLink>
-              <button
+              <AppLink
                 className="home-button home-button-outline"
-                onClick={findRoute}
+                href={selectionLink('/user/journey-planner')}
+                onClick={validateSelection}
               >
                 Tìm Đường
-              </button>
+              </AppLink>
             </div>
           </div>
         </section>
@@ -346,7 +348,12 @@ export default function UserHomePage({
           </div>
           <div className="home-footer-links">
             <h3>Dịch vụ của chúng tôi</h3>
-            <button onClick={findRoute}>Tìm kiếm lộ trình</button>
+            <AppLink
+              href={selectionLink('/user/journey-planner')}
+              onClick={validateSelection}
+            >
+              Tìm kiếm lộ trình
+            </AppLink>
             {['Bản đồ tuyến xe', 'Giá vé & Loại thẻ'].map((label) => (
               <button key={label} onClick={() => unavailable(label)}>
                 {label}
@@ -384,7 +391,8 @@ export default function UserHomePage({
               ))}
             </div>
             <p>
-              Nhận thông tin cập nhật mới nhất từ fanpage chính thức của GoBus.
+              Nhận thông tin cập nhật mới nhất từ fanpage chính thức của
+              GoBus.
             </p>
           </div>
         </div>
@@ -418,8 +426,8 @@ export default function UserHomePage({
           className="passenger-dialog"
         >
           <p className="dialog-description">
-            Chức năng này chưa được triển khai. Bạn có thể tra cứu các tuyến xe
-            đang hoạt động ngay trên trang chủ.
+            Chức năng này chưa được triển khai. Bạn có thể tra cứu các tuyến
+            xe đang hoạt động ngay trên trang chủ.
           </p>
           <button className="home-button" onClick={() => setNotice('')}>
             Đã hiểu

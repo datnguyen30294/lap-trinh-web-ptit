@@ -8,7 +8,13 @@ Từ thư mục gốc chạy `docker compose up -d`. Chạy backend bằng `npm 
 
 Mở **http://localhost:5173/login** theo WEB_ORIGIN hiện có. Dùng tài khoản USER đang hoạt động để vào `/user/home`; tài khoản ADMIN vào `/stations` hoặc đường dẫn quản trị hợp lệ đang mở. Tài khoản kiểm thử được cấu hình trong `.env`; không ghi thông tin đăng nhập vào tài liệu hoặc mã nguồn.
 
-Trang chủ hiển thị tên thật, đăng xuất, bến và tuyến thật. Chọn hai bến khác nhau để tìm tuyến đi thẳng theo đúng chiều, hoặc chọn tuyến gợi ý / Xem tất cả tuyến. Hộp thoại kết quả có phân trang, điểm dừng và giờ hoạt động. Escape đóng hộp thoại và trả focus về nút mở.
+Trang chủ hiển thị tên thật, đăng xuất, bến và tuyến thật. Hai ô điểm xuất phát và điểm đến cho phép gõ địa điểm, lọc gợi ý có hoặc không dấu và chọn bến. Nhập địa điểm rồi bấm **Tìm kiếm lộ trình nhanh** hoặc **Tìm Đường** để mở trang **Lộ trình & Bản đồ** với điểm đi và điểm đến đã điền sẵn. Khi có đủ hai bến hợp lệ, trang bản đồ tự tìm lộ trình. Các nút **Mua vé** và **Đặt vé ngay** chuyển nội dung hai ô sang trang đặt vé để người dùng chọn ngày và tìm chuyến. Chữ chưa chọn từ gợi ý vẫn được giữ nguyên ở trang đích; người dùng chọn bến phù hợp để xác định tọa độ hoặc tìm chuyến vé hợp lệ.
+
+ID bến đi qua tham số `from` và `to`; chữ chưa chọn bến đi qua `from_text` và `to_text` trong URL, nên tải lại trang đích vẫn giữ nội dung. Chỉ nhập một ô thì ô đó vẫn được chuyển sang để tiếp tục nhập. Sửa chữ sau khi chọn bến sẽ bỏ ID cũ để không tìm nhầm bến. Trang bản đồ đối chiếu ID với danh sách bến hiện tại, rồi lấy tên và tọa độ bằng API địa điểm theo mã bến. Nếu bến đã ngừng hoạt động hoặc thiếu tọa độ, trang báo lỗi và cho chọn lại hoặc thử tải lại. Không tự thay điểm xuất phát đã chọn bằng vị trí demo. Hành trình đang theo dõi được giữ lại và có nút xem riêng khi mở một tìm kiếm mới.
+
+Các nút tuyến gợi ý và **Xem tất cả tuyến** vẫn mở hộp thoại kết quả có phân trang, điểm dừng và giờ hoạt động. Escape đóng hộp thoại và trả focus về nút mở.
+
+Kiểm chứng thay đổi ngày 08/10/2026: frontend build và lint đạt, 132 bài kiểm tra đạt. Các ca mới kiểm tra chuyển hai bến qua từng nút, tải lại URL, Back, một bến, bến không còn khả dụng, lỗi tải và phản hồi sau khi rời trang. Các ca bổ sung kiểm tra chữ chưa chọn gợi ý qua cả năm nút điều hướng, ký tự tiếng Việt và dấu &, tải lại trang, một ô, và sửa chữ sau khi chọn bến. Đã kiểm tra trên Chrome bằng bến Tràng Thi, Bến xe Yên Nghĩa và chữ Học viện Bưu chính.
 
 ## Các file của thay đổi này
 
@@ -46,8 +52,8 @@ Những khác biệt có chủ đích:
 - Đồng nhất chữ EGBus/VinBus trong mẫu thành GoBus; giữ nội dung giới thiệu, ảnh nền, màu và bố cục gốc.
 - Tên người dùng và Đăng xuất thay Đăng ký/Đăng nhập; tên dài được rút gọn trên giao diện và có tên đầy đủ trong tooltip.
 - Tuyến E01/E03 minh họa được thay bằng tuyến thật từ MySQL.
-- Dùng ô chọn bến thật thay ô nhập địa chỉ tự do, vì module chưa có định vị hay tìm địa chỉ.
-- Bổ sung nhãn Sắp có cho bản đồ/đặt vé và hộp thoại giải thích cho các chức năng chưa triển khai. Chưa có đặt vé, thanh toán, bản đồ, mạng xã hội, trang pháp lý hoặc tin tức.
+- Hai ô nhập hỗ trợ gợi ý bến thật và giữ chữ đang gõ khi chuyển sang bản đồ hoặc đặt vé.
+- Bản đồ và đặt vé đã có trang riêng. Hộp thoại Sắp có chỉ dùng cho các chức năng chưa triển khai như mạng xã hội, trang pháp lý hoặc tin tức.
 - Chữ gợi ý trong ô chọn đậm màu hơn mẫu để dễ đọc. Kết quả tra cứu, trạng thái tải/lỗi/rỗng là phần tương tác bổ sung.
 - Không có frame mobile trong section Trang chủ; responsive được xây dựng từ bố cục desktop và kiểm tra ở 390px/320px.
 

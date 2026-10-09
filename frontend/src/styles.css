@@ -174,9 +174,6 @@ small {
   color: var(--blue);
   font-weight: 600;
 }
-.unavailable {
-  cursor: default;
-}
 .stations-page {
   padding: var(--page-pad);
   flex: 1;
@@ -633,9 +630,6 @@ fieldset {
   }
   .sidebar nav {
     display: block;
-  }
-  .sidebar .unavailable {
-    display: none;
   }
   .nav-item {
     font-size: 14px;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { DEMO_POSITION } from './demoLocation';
 
 const messages = {
@@ -21,7 +21,9 @@ function readPosition() {
           !Number.isFinite(coords.longitude) ||
           Math.abs(coords.longitude) > 180
         ) {
-          reject(new Error('Vị trí nhận được không hợp lệ. Vui lòng thử lại.'));
+          reject(
+            new Error('Vị trí nhận được không hợp lệ. Vui lòng thử lại.'),
+          );
           return;
         }
         resolve({
@@ -46,7 +48,12 @@ export function useCurrentPosition(initialMode = 'demo') {
   const [mode, setMode] = useState(initialMode);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState({
-    status: initialMode === 'demo' ? 'success' : 'loading',
+    status:
+      initialMode === 'demo'
+        ? 'success'
+        : initialMode === 'manual'
+          ? 'idle'
+          : 'loading',
     position: initialMode === 'demo' ? DEMO_POSITION : null,
     error: '',
   });
@@ -80,10 +87,10 @@ export function useCurrentPosition(initialMode = 'demo') {
     setState({ status: 'loading', position: null, error: '' });
     setAttempt((value) => value + 1);
   }
-  function select(position) {
+  const select = useCallback((position) => {
     setMode('manual');
     setState({ status: 'success', position, error: '' });
-  }
+  }, []);
   function clear() {
     setMode('manual');
     setState({ status: 'idle', position: null, error: '' });

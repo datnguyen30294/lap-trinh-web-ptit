@@ -17,8 +17,13 @@ export default function JourneySidebar({
   onOriginClear,
   onDestinationSelect,
   onDestinationClear,
+  prefill,
+  initialOriginQuery,
+  initialDestinationQuery,
 }) {
-  const ready = current.status === 'success' && !!destination;
+  const sameStation =
+    !!destination && current.position?.id === destination.id;
+  const ready = current.status === 'success' && !!destination && !sameStation;
   const idle = journey.status === 'idle';
   const loading = journey.status === 'loading';
   if (journey.detailOpen && journey.selectedId) {
@@ -51,14 +56,28 @@ export default function JourneySidebar({
             ? 'Tìm địa điểm và chọn nơi bạn muốn đến.'
             : 'Hà Nội · Khởi hành ngay'}
       </p>
+      {prefill?.error && (
+        <div className="jp-error" role="alert">
+          <p>{prefill.error}</p>
+          <button
+            type="button"
+            className="jp-location-button"
+            onClick={prefill.retry}
+          >
+            Thử tải lại địa điểm
+          </button>
+        </div>
+      )}
       <OriginAutocomplete
         current={current}
+        initialQuery={initialOriginQuery}
         onSelect={onOriginSelect}
         onClear={onOriginClear}
         onLocate={onLocate}
       />
       <PlaceAutocomplete
         selected={destination}
+        initialQuery={initialDestinationQuery}
         onSelect={onDestinationSelect}
         onClear={onDestinationClear}
       />
@@ -121,9 +140,11 @@ export default function JourneySidebar({
           </button>
           {idle && (
             <p className="jp-hint" id="journey-ready-hint" role="status">
-              {ready
-                ? 'Đã có điểm đi và điểm đến.'
-                : 'Cần vị trí điểm đi và một điểm đến để tiếp tục.'}
+              {sameStation
+                ? 'Điểm xuất phát và điểm đến phải khác nhau.'
+                : ready
+                  ? 'Đã có điểm đi và điểm đến.'
+                  : 'Cần vị trí điểm đi và một điểm đến để tiếp tục.'}
             </p>
           )}
         </div>

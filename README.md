@@ -32,6 +32,7 @@ Tài khoản demo trên database mới: `admin@gobus.local` / `GoBusAdmin2026!` 
 
 ## Các module hiện có
 
+- [Đăng ký tài khoản theo Figma](docs/registration-module.md): `/register`, tạo tài khoản USER và tự đăng nhập.
 - [Trang chủ USER theo Figma và tra cứu tuyến](docs/user-home-module.md): `/user/home`.
 - [Quản lý bến xe](docs/stations-module.md): `/stations`.
 - [Quản lý tuyến và điểm dừng](docs/routes-module.md): `/routes`.

@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import App from './App';
 import { authApi } from './services/stationsApi';
 import { bookingsApi } from './services/bookingsApi';
+import { journeyPlannerApi } from './services/journeyPlannerApi';
 
 vi.mock('./services/stationsApi', () => ({
   authApi: { me: vi.fn(), logout: vi.fn() },
@@ -50,6 +51,15 @@ vi.mock('./services/bookingsApi', () => ({
     ]),
   },
 }));
+vi.mock('./services/journeyPlannerApi', () => ({
+  journeyPlannerApi: {
+    tracking: vi.fn(async () => ({ active: null })),
+  },
+}));
+// Giữ trang lộ trình thật, thay phần vẽ Leaflet trong môi trường jsdom.
+vi.mock('./components/journey-planner/JourneyMap', () => ({
+  default: () => <div aria-label="Bản đồ hành trình" role="region" />,
+}));
 beforeEach(() => {
   vi.clearAllMocks();
   window.history.replaceState(null, '', '/user/home');
@@ -59,6 +69,8 @@ beforeEach(() => {
     role: 'USER',
   });
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+  // jsdom không cung cấp cuộn tới phần tử như trình duyệt thật.
+  HTMLElement.prototype.scrollIntoView = vi.fn();
 });
 
 it('opens booking from home without reloading the session and keeps the booking header mounted', async () => {
@@ -111,6 +123,26 @@ it('reloads the selected trip when only its query changes', async () => {
   expect(
     await screen.findByRole('heading', { name: /Tuyến TEST-11/ }),
   ).toBeVisible();
+});
+
+it('opens the journey planner from the booking header without reloading the session', async () => {
+  window.history.replaceState(null, '', '/user/bookings');
+  const actor = userEvent.setup();
+  render(<App />);
+  await screen.findByRole('heading', { name: 'Đặt vé trực tuyến' });
+  await actor.click(screen.getByRole('link', { name: 'Lộ trình & Bản đồ' }));
+  expect(window.location.pathname).toBe('/user/journey-planner');
+  expect(window.location.hash).toBe('');
+  expect(
+    await screen.findByRole('heading', { name: 'Hôm nay bạn đi đâu?' }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole('region', { name: 'Bản đồ hành trình' }),
+  ).toBeVisible();
+  await waitFor(() =>
+    expect(journeyPlannerApi.tracking).toHaveBeenCalledTimes(1),
+  );
+  expect(authApi.me).toHaveBeenCalledTimes(1);
 });
 
 it('shows the saved receipt after submitting without restarting the app', async () => {

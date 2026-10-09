@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserHomePage from './UserHomePage';
 import { passengerApi } from '../services/passengerApi';
@@ -31,6 +31,7 @@ const props = {
 };
 beforeEach(() => {
   vi.resetAllMocks();
+  window.history.replaceState(null, '', '/user/home');
   passengerApi.stations.mockResolvedValue(stations);
   passengerApi.routes.mockResolvedValue(response);
 });
@@ -44,32 +45,38 @@ describe('Passenger homepage', () => {
     expect(screen.queryByText('Tuyến E01')).not.toBeInTheDocument();
     expect(screen.getAllByRole('combobox')).toHaveLength(2);
   });
-  it('searches a chosen segment and renders only server results', async () => {
+  it('opens the map with the chosen segment instead of losing the home inputs', async () => {
     const actor = userEvent.setup();
     render(<UserHomePage {...props} />);
     await screen.findByRole('button', { name: 'Tuyến 02' });
-    await actor.selectOptions(screen.getByLabelText('Điểm xuất phát'), '2');
-    await actor.selectOptions(screen.getByLabelText('Điểm đến'), '3');
+    await actor.click(screen.getByLabelText('Điểm xuất phát'));
+    await actor.click(
+      await screen.findByRole('option', { name: /Bến giữa/ }),
+    );
+    await actor.click(screen.getByLabelText('Điểm đến'));
+    await actor.click(
+      await screen.findByRole('option', { name: /Bến cuối/ }),
+    );
     await actor.click(
       screen.getByRole('button', { name: 'Tìm kiếm lộ trình nhanh' }),
     );
-    const dialog = screen.getByRole('dialog');
-    expect(await within(dialog).findByText('Tuyến từ máy chủ')).toBeVisible();
-    expect(passengerApi.routes).toHaveBeenLastCalledWith(
-      { from_station_id: '2', to_station_id: '3', page: 1, limit: 5 },
-      expect.any(AbortSignal),
-    );
-    expect(within(dialog).getByText('Bến giữa')).toHaveClass('selected-stop');
-    await actor.click(
-      within(dialog).getByRole('button', { name: 'Đóng hộp thoại' }),
-    );
+    expect(window.location.pathname).toBe('/user/journey-planner');
+    expect(new URLSearchParams(window.location.search).get('from')).toBe('2');
+    expect(new URLSearchParams(window.location.search).get('to')).toBe('3');
+    expect(passengerApi.routes).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
   it('rejects identical stops without making a search request', async () => {
     render(<UserHomePage {...props} />);
     await screen.findByRole('button', { name: 'Tuyến 02' });
-    await userEvent.selectOptions(screen.getByLabelText('Điểm xuất phát'), '1');
-    await userEvent.selectOptions(screen.getByLabelText('Điểm đến'), '1');
+    await userEvent.click(screen.getByLabelText('Điểm xuất phát'));
+    await userEvent.click(
+      await screen.findByRole('option', { name: /Bến đầu/ }),
+    );
+    await userEvent.click(screen.getByLabelText('Điểm đến'));
+    await userEvent.click(
+      await screen.findByRole('option', { name: /Bến đầu/ }),
+    );
     await userEvent.click(
       screen.getByRole('button', { name: 'Tìm kiếm lộ trình nhanh' }),
     );
@@ -86,7 +93,7 @@ describe('Passenger homepage', () => {
     );
     expect(
       screen.getByRole('button', { name: 'Tìm kiếm lộ trình nhanh' }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     await userEvent.click(screen.getByRole('button', { name: 'Thử lại' }));
     expect(
       await screen.findByRole('button', { name: 'Tuyến 02' }),
@@ -101,7 +108,7 @@ describe('Passenger homepage', () => {
     });
     render(<UserHomePage {...props} />);
     await screen.findByText('Chưa có tuyến xe đang hoạt động.');
-    expect(screen.getByLabelText('Điểm xuất phát')).toBeDisabled();
+    expect(screen.getByLabelText('Điểm xuất phát')).toBeEnabled();
     await userEvent.click(
       screen.getByRole('button', { name: 'Xem tất cả tuyến' }),
     );

@@ -260,43 +260,30 @@
   flex-direction: column;
   gap: 12px;
 }
-.home-field {
-  display: flex;
-  flex-direction: column;
+.home-station-field {
   gap: 6px;
+}
+.home-station-field > label {
   font-size: 11px;
   line-height: 15px;
-  font-weight: 700;
   text-transform: uppercase;
 }
-.home-input {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-.home-input > img {
-  position: absolute;
-  left: 14px;
-  pointer-events: none;
-}
-.home-input select {
-  appearance: none;
-  width: 100%;
+.home-station-field input {
   height: 46px;
-  border: 1px solid var(--home-border);
-  border-radius: 10px;
-  background: white;
-  color: #1f3a2b;
+  border-color: var(--home-border);
   padding: 10px 14px 10px 42px;
   font-weight: 400;
-  font-size: 14px;
-  text-overflow: ellipsis;
 }
-.home-input select:has(option:checked[value=""]) {
-  color: #6b7f72;
+.home-station-field .booking-station-icon {
+  left: 14px;
+  right: auto;
 }
-.home-input select option {
-  color: var(--home-ink);
+.home-station-field .booking-station-menu {
+  position: static;
+  background: white;
+  border-color: var(--home-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px #12342226;
 }
 .home-suggestions {
   display: flex;
@@ -470,6 +457,7 @@
   gap: 16px;
 }
 .home-footer-links button,
+.home-footer-links a,
 .home-footer-bottom button {
   color: white;
   opacity: 0.75;
@@ -480,7 +468,8 @@
   font-size: 14px;
   line-height: 21px;
 }
-.home-footer button:hover {
+.home-footer button:hover,
+.home-footer-links a:hover {
   text-decoration: underline;
   opacity: 1;
 }
@@ -709,7 +698,7 @@
   .home-search {
     padding: 24px 20px;
   }
-  .home-input select {
+  .home-station-field input {
     font-size: 16px;
   }
   .home-hero-actions .home-button {
@@ -747,7 +736,8 @@
   .home-contact {
     grid-column: 1 / -1;
   }
-  .home-footer-links button {
+  .home-footer-links button,
+  .home-footer-links a {
     min-height: 28px;
   }
   .home-footer-bottom {

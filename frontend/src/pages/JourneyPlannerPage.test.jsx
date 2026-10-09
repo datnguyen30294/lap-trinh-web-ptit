@@ -4,6 +4,10 @@ import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import JourneyPlannerPage from './JourneyPlannerPage';
 import { journeyPlannerApi } from '../services/journeyPlannerApi';
 import { searchAddresses } from '../services/geocodingService';
+import { passengerApi } from '../services/passengerApi';
+vi.mock('../services/passengerApi', () => ({
+  passengerApi: { stations: vi.fn() },
+}));
 vi.mock('../services/geocodingService', () => ({ searchAddresses: vi.fn() }));
 
 // Leaflet lifecycle and drawing are covered in JourneyMap.test.jsx.
@@ -110,6 +114,7 @@ function trackingFor() {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  window.history.replaceState(null, '', '/user/journey-planner');
   Object.defineProperty(navigator, 'geolocation', {
     configurable: true,
     value: { getCurrentPosition: locate },
@@ -118,11 +123,170 @@ beforeEach(() => {
   journeyPlannerApi.places.mockResolvedValue({ items: [place], total: 1 });
   journeyPlannerApi.search.mockResolvedValue(journeys);
   journeyPlannerApi.tracking.mockResolvedValue({ active: null });
-  journeyPlannerApi.startTracking.mockResolvedValue({ active: trackingFor() });
+  journeyPlannerApi.startTracking.mockResolvedValue({
+    active: trackingFor(),
+  });
   journeyPlannerApi.endTracking.mockResolvedValue({ ended: true });
   journeyPlannerApi.detail.mockImplementation(async (_, __, routeId) =>
     detailFor(routeId),
   );
+});
+
+describe('Stations carried from the homepage', () => {
+  const origin = {
+    ...place,
+    id: '1',
+    code: 'HN-BC',
+    name: 'Bác Cổ',
+    latitude: 21.02,
+  };
+  beforeEach(() => {
+    passengerApi.stations.mockResolvedValue([origin, place]);
+    journeyPlannerApi.places.mockImplementation(async (code) => ({
+      items: code === origin.code ? [origin] : [place],
+    }));
+  });
+
+  it('restores both named inputs and searches from the supplied origin after reload', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/user/journey-planner?from=1&to=2',
+    );
+    const first = render(<JourneyPlannerPage {...props} />);
+    expect(await screen.findByLabelText('Điểm đi')).toHaveValue('Bác Cổ');
+    expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
+    expect(locate).not.toHaveBeenCalled();
+    expect(journeyPlannerApi.search).toHaveBeenCalledWith(
+      expect.objectContaining({ ...origin, label: origin.name }),
+      '2',
+      expect.any(AbortSignal),
+    );
+    first.unmount();
+    render(<JourneyPlannerPage {...props} />);
+    expect(await screen.findByLabelText('Điểm đi')).toHaveValue('Bác Cổ');
+    expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
+  });
+
+  it.each([
+    ['from=1', 'Điểm đi', 'Bác Cổ'],
+    ['to=2', 'Điểm đến', 'Tràng Thi'],
+  ])(
+    'carries a single selection from %s without searching automatically',
+    async (query, label, value) => {
+      window.history.replaceState(null, '', `/user/journey-planner?${query}`);
+      render(<JourneyPlannerPage {...props} />);
+      expect(await screen.findByLabelText(label)).toHaveValue(value);
+      expect(journeyPlannerApi.search).not.toHaveBeenCalled();
+    },
+  );
+
+  it('keeps the valid destination when the origin no longer exists', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/user/journey-planner?from=999&to=2',
+    );
+    render(<JourneyPlannerPage {...props} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Bến đã chọn không còn khả dụng',
+    );
+    expect(screen.getByLabelText('Điểm đi')).toHaveValue('');
+    expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình', exact: true }),
+    ).toBeDisabled();
+    expect(journeyPlannerApi.search).not.toHaveBeenCalled();
+    expect(locate).not.toHaveBeenCalled();
+  });
+
+  it('does not substitute a similarly named place for the selected station', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/user/journey-planner?from=1&to=2',
+    );
+    journeyPlannerApi.places.mockResolvedValue({ items: [place] });
+    render(<JourneyPlannerPage {...props} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Chưa có tọa độ cho Bác Cổ',
+    );
+    expect(screen.getByLabelText('Điểm đi')).toHaveValue('');
+    expect(journeyPlannerApi.search).not.toHaveBeenCalled();
+  });
+
+  it('rejects identical stations from a direct link', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/user/journey-planner?from=2&to=2',
+    );
+    render(<JourneyPlannerPage {...props} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'phải khác nhau',
+    );
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình', exact: true }),
+    ).toBeDisabled();
+    expect(journeyPlannerApi.search).not.toHaveBeenCalled();
+  });
+
+  it('retries a failed station catalog and fills the original selections', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/user/journey-planner?from=1&to=2',
+    );
+    passengerApi.stations.mockRejectedValueOnce(
+      new Error('Không tải được bến'),
+    );
+    render(<JourneyPlannerPage {...props} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Không tải được bến',
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Thử tải lại địa điểm' }),
+    );
+    expect(await screen.findByLabelText('Điểm đi')).toHaveValue('Bác Cổ');
+    expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
+    expect(journeyPlannerApi.search).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a pending catalog after leaving the page', async () => {
+    let finish;
+    passengerApi.stations.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    );
+    window.history.replaceState(
+      null,
+      '',
+      '/user/journey-planner?from=1&to=2',
+    );
+    const page = render(<JourneyPlannerPage {...props} />);
+    page.unmount();
+    await act(async () => finish([origin, place]));
+    expect(journeyPlannerApi.places).not.toHaveBeenCalled();
+    expect(journeyPlannerApi.search).not.toHaveBeenCalled();
+  });
+
+  it('keeps requested inputs visible when a previous tracked journey is restored', async () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/user/journey-planner?from=1&to=2',
+    );
+    journeyPlannerApi.tracking.mockResolvedValue({ active: trackingFor() });
+    render(<JourneyPlannerPage {...props} />);
+    expect(await screen.findByLabelText('Điểm đi')).toHaveValue('Bác Cổ');
+    expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
+    expect(
+      screen.getByRole('button', { name: 'Xem hành trình đang theo dõi' }),
+    ).toBeVisible();
+    expect(journeyPlannerApi.endTracking).not.toHaveBeenCalled();
+  });
 });
 
 describe('Journey search results', () => {
@@ -270,12 +434,13 @@ describe('Journey search results', () => {
       'aria-pressed',
       'false',
     );
-    await actor.click(screen.getByRole('button', { name: 'Tìm lại lộ trình' }));
+    await actor.click(
+      screen.getByRole('button', { name: 'Tìm lại lộ trình' }),
+    );
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: /Tuyến 02/ })).toHaveAttribute(
-        'aria-pressed',
-        'false',
-      ),
+      expect(
+        screen.getByRole('button', { name: /Tuyến 02/ }),
+      ).toHaveAttribute('aria-pressed', 'false'),
     );
     expect(screen.getByRole('button', { name: /Tuyến 26/ })).toHaveAttribute(
       'aria-pressed',
@@ -294,7 +459,9 @@ describe('Journey search results', () => {
     render(<JourneyPlannerPage {...props} />);
     await selectDestination(actor);
     await actor.click(screen.getByRole('button', { name: 'Tìm lộ trình' }));
-    await actor.click(await screen.findByRole('button', { name: /Tuyến 02/ }));
+    await actor.click(
+      await screen.findByRole('button', { name: /Tuyến 02/ }),
+    );
     expect(
       screen.getByRole('heading', { name: 'Chi tiết tuyến 02' }),
     ).toBeVisible();
@@ -308,12 +475,16 @@ describe('Journey search results', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'không còn chuyến',
     );
-    await actor.click(screen.getByRole('button', { name: 'Thử lại chi tiết' }));
+    await actor.click(
+      screen.getByRole('button', { name: 'Thử lại chi tiết' }),
+    );
     await actor.click(
       await screen.findByRole('button', { name: 'Bắt đầu hành trình' }),
     );
     expect(
-      await screen.findByRole('heading', { name: 'Đang theo dõi hành trình' }),
+      await screen.findByRole('heading', {
+        name: 'Đang theo dõi hành trình',
+      }),
     ).toBeVisible();
     expect(screen.getByText('Bước 1 / 4 · Đi đến điểm dừng')).toBeVisible();
     expect(screen.getByText('6 phút')).toBeVisible();
@@ -405,7 +576,9 @@ describe('Journey search results', () => {
     render(<JourneyPlannerPage {...props} />);
     await selectDestination(actor);
     await actor.click(screen.getByRole('button', { name: 'Tìm lộ trình' }));
-    await actor.click(await screen.findByRole('button', { name: /Tuyến 02/ }));
+    await actor.click(
+      await screen.findByRole('button', { name: /Tuyến 02/ }),
+    );
     await actor.click(
       await screen.findByRole('button', { name: 'Bắt đầu hành trình' }),
     );
@@ -425,7 +598,9 @@ describe('Journey search results', () => {
     render(<JourneyPlannerPage {...props} />);
     await selectDestination(actor);
     await actor.click(screen.getByRole('button', { name: 'Tìm lộ trình' }));
-    await actor.click(await screen.findByRole('button', { name: /Tuyến 02/ }));
+    await actor.click(
+      await screen.findByRole('button', { name: /Tuyến 02/ }),
+    );
     await screen.findByText('Đi bộ đến Bác Cổ');
     await actor.click(
       screen.getByRole('button', { name: /Quay lại các tuyến/ }),
@@ -459,7 +634,9 @@ describe('Journey search results', () => {
     render(<JourneyPlannerPage {...props} />);
     await selectDestination(actor);
     await actor.click(screen.getByRole('button', { name: 'Tìm lộ trình' }));
-    await actor.click(await screen.findByRole('button', { name: /Tuyến 02/ }));
+    await actor.click(
+      await screen.findByRole('button', { name: /Tuyến 02/ }),
+    );
     const signal = journeyPlannerApi.detail.mock.calls[0][3];
     await actor.click(
       screen.getByRole('button', { name: /Quay lại các tuyến/ }),
@@ -497,7 +674,9 @@ describe('Journey search results', () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
-    await actor.click(screen.getByRole('button', { name: 'Tìm lại lộ trình' }));
+    await actor.click(
+      screen.getByRole('button', { name: 'Tìm lại lộ trình' }),
+    );
     expect(
       await screen.findByRole('button', { name: /Tuyến 02/ }),
     ).toBeInTheDocument();
@@ -521,7 +700,9 @@ describe('Journey search results', () => {
     expect(
       screen.queryByRole('button', { name: /Tuyến 02/ }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeDisabled();
   });
   it('clears routes when updating location and cancels a pending search on unmount', async () => {
     const actor = userEvent.setup();
@@ -552,7 +733,10 @@ afterAll(() =>
 );
 
 async function selectDestination(actor) {
-  await actor.type(screen.getByRole('combobox', { name: 'Điểm đến' }), 'tràng');
+  await actor.type(
+    screen.getByRole('combobox', { name: 'Điểm đến' }),
+    'tràng',
+  );
   await actor.click(await screen.findByRole('option', { name: /Tràng Thi/ }));
 }
 
@@ -570,7 +754,9 @@ describe('Journey planner destination selection', () => {
     const input = screen.getByRole('combobox', { name: 'Điểm đi' });
     await actor.clear(input);
     await actor.type(input, 'Hồ Gươm');
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeDisabled();
     expect(searchAddresses).not.toHaveBeenCalled();
     await actor.keyboard('{Enter}');
     await actor.click(
@@ -591,7 +777,9 @@ describe('Journey planner destination selection', () => {
     expect(
       screen.queryByRole('button', { name: /Tuyến 02/ }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeDisabled();
     expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
   });
 
@@ -622,7 +810,9 @@ describe('Journey planner destination selection', () => {
     expect(
       screen.getByRole('region', { name: 'Bản đồ lộ trình Hà Nội' }),
     ).toHaveAttribute('data-latitude', '');
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeDisabled();
     const options = screen.getAllByRole('option');
     expect(options[0]).toHaveTextContent('Dùng vị trí hiện tại của tôi');
     await actor.click(options[0]);
@@ -662,7 +852,9 @@ describe('Journey planner destination selection', () => {
     );
     expect(signal.aborted).toBe(true);
     expect(screen.queryByText('Kết quả địa chỉ cũ')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeDisabled();
   });
   it('fills current origin and selected destination, enabling only a complete selection', async () => {
     const actor = userEvent.setup();
@@ -695,7 +887,9 @@ describe('Journey planner destination selection', () => {
     expect(button).toBeDisabled();
     await actor.click(screen.getByRole('option', { name: /Tràng Thi/ }));
     expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
-    const map = screen.getByRole('region', { name: 'Bản đồ lộ trình Hà Nội' });
+    const map = screen.getByRole('region', {
+      name: 'Bản đồ lộ trình Hà Nội',
+    });
     expect(map).toHaveAttribute('data-destination', place.id);
     expect(map).toHaveAttribute(
       'data-destination-latitude',
@@ -720,23 +914,33 @@ describe('Journey planner destination selection', () => {
     const actor = userEvent.setup();
     render(<JourneyPlannerPage {...props} />);
     await selectDestination(actor);
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeDisabled();
     await act(async () => success(position));
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeEnabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeEnabled();
   });
   it('shows location permission errors, preserves the destination and permits retry', async () => {
     locate.mockImplementationOnce((_, error) => error({ code: 1 }));
     const actor = userEvent.setup();
     render(<JourneyPlannerPage {...props} />);
-    expect(await screen.findByRole('alert')).toHaveTextContent('chưa cho phép');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'chưa cho phép',
+    );
     await selectDestination(actor);
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeDisabled();
     await actor.click(
       screen.getByRole('button', { name: 'Lấy lại vị trí của tôi' }),
     );
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeEnabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeEnabled();
   });
   it('supports keyboard selection and invalidates the selection when edited', async () => {
     const actor = userEvent.setup();
@@ -748,18 +952,21 @@ describe('Journey planner destination selection', () => {
     await screen.findByRole('option');
     await actor.keyboard('{ArrowDown}{Enter}');
     expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi');
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeEnabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeEnabled();
     await actor.type(
       screen.getByRole('combobox', { name: 'Điểm đến' }),
       ' khác',
     );
     expect(screen.getByLabelText('Điểm đến')).toHaveValue('Tràng Thi khác');
-    expect(screen.getByRole('button', { name: 'Tìm lộ trình' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Tìm lộ trình' }),
+    ).toBeDisabled();
     await actor.keyboard('{Escape}');
-    expect(screen.getByRole('combobox', { name: 'Điểm đến' })).toHaveAttribute(
-      'aria-expanded',
-      'false',
-    );
+    expect(
+      screen.getByRole('combobox', { name: 'Điểm đến' }),
+    ).toHaveAttribute('aria-expanded', 'false');
   });
   it('handles empty results and a retryable API failure', async () => {
     journeyPlannerApi.places
@@ -767,15 +974,22 @@ describe('Journey planner destination selection', () => {
       .mockRejectedValueOnce(new Error('Không kết nối được máy chủ'));
     const actor = userEvent.setup();
     render(<JourneyPlannerPage {...props} />);
-    await actor.type(screen.getByRole('combobox', { name: 'Điểm đến' }), 'xyz');
+    await actor.type(
+      screen.getByRole('combobox', { name: 'Điểm đến' }),
+      'xyz',
+    );
     await screen.findByText(/Không tìm thấy địa điểm phù hợp/);
     await actor.clear(screen.getByRole('combobox', { name: 'Điểm đến' }));
     await actor.type(
       screen.getByRole('combobox', { name: 'Điểm đến' }),
       'tràng',
     );
-    expect(await screen.findByRole('alert')).toHaveTextContent('Không kết nối');
-    await actor.click(screen.getByRole('button', { name: 'Thử lại tìm kiếm' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Không kết nối',
+    );
+    await actor.click(
+      screen.getByRole('button', { name: 'Thử lại tìm kiếm' }),
+    );
     await screen.findByRole('option', { name: /Tràng Thi/ });
   });
   it('ignores stale results after typing a new search and also handles whitespace edits', async () => {
@@ -788,7 +1002,10 @@ describe('Journey planner destination selection', () => {
     );
     const actor = userEvent.setup();
     render(<JourneyPlannerPage {...props} />);
-    await actor.type(screen.getByRole('combobox', { name: 'Điểm đến' }), 'old');
+    await actor.type(
+      screen.getByRole('combobox', { name: 'Điểm đến' }),
+      'old',
+    );
     await waitFor(() =>
       expect(journeyPlannerApi.places).toHaveBeenCalledTimes(1),
     );

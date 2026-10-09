@@ -8,9 +8,10 @@ export default function OriginAutocomplete({
   onSelect,
   onClear,
   onLocate,
+  initialQuery = '',
 }) {
   const id = useId();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [result, setResult] = useState({
@@ -130,7 +131,8 @@ export default function OriginAutocomplete({
     <div
       className="jp-point-autocomplete"
       onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setOpen(false);
       }}
     >
       <div className="jp-point">
@@ -181,7 +183,12 @@ export default function OriginAutocomplete({
                 onClick={() => choose(index)}
               >
                 {!item && (
-                  <img src="/icons/mappin.svg" alt="" width="18" height="18" />
+                  <img
+                    src="/icons/mappin.svg"
+                    alt=""
+                    width="18"
+                    height="18"
+                  />
                 )}
                 <span>
                   <strong>
@@ -232,8 +239,8 @@ export default function OriginAutocomplete({
               )}
               {addresses.status === 'success' && !addresses.items.length && (
                 <p className="jp-hint" role="status">
-                  Không tìm thấy địa chỉ trong vùng tìm kiếm Hà Nội. Hãy thử tên
-                  địa danh hoặc đường phố.
+                  Không tìm thấy địa chỉ trong vùng tìm kiếm Hà Nội. Hãy thử
+                  tên địa danh hoặc đường phố.
                 </p>
               )}
             </div>

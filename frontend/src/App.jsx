@@ -106,6 +106,7 @@ export default function App() {
     if (!passengerReady) return;
     const main =
       document.getElementById('booking-main') ||
+      document.getElementById('journey-main') ||
       document.getElementById('user-main');
     const hashTarget =
       window.location.hash &&
@@ -190,7 +191,10 @@ export default function App() {
   );
   const bookingPage =
     bookingPages[destination] ||
-    (ticketMatch && ['Chi tiết vé', <TicketDetailPage id={ticketMatch[1]} />]);
+    (ticketMatch && [
+      'Chi tiết vé',
+      <TicketDetailPage id={ticketMatch[1]} />,
+    ]);
   if (bookingPage)
     return (
       <BookingLayout
@@ -222,6 +226,7 @@ export default function App() {
   if (destination === '/user/journey-planner')
     return (
       <JourneyPlannerPage
+        key={location}
         user={user}
         onLogout={logout}
         logoutBusy={logoutBusy}

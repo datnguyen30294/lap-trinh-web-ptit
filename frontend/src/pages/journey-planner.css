@@ -188,6 +188,11 @@
 .jp-header + .jp-error {
   padding: 10px 24px;
 }
+.jp-prefill-notice {
+  padding: 16px 24px;
+  background: var(--jp-panel);
+  border-bottom: 1px solid var(--jp-line);
+}
 .jp-travel-note {
   border-top: 1px solid var(--jp-line);
   margin-top: 24px;

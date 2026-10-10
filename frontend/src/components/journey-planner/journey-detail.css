@@ -113,6 +113,10 @@
   box-shadow: 0 2px 8px #006a3930;
 }
 .jp-detail-buy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   background: white;
   border-color: var(--jp-line);
   color: var(--jp-ink);

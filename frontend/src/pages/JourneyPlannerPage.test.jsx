@@ -489,10 +489,12 @@ describe('Journey search results', () => {
     expect(screen.getByText('Bước 1 / 4 · Đi đến điểm dừng')).toBeVisible();
     expect(screen.getByText('6 phút')).toBeVisible();
     expect(screen.getByText('Dự kiến đến nơi · 08:15')).toBeVisible();
-    await actor.click(
-      screen.getByRole('button', { name: 'Mua vé', exact: true }),
-    );
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole('complementary')).getByRole('link', {
+        name: 'Mua vé',
+        exact: true,
+      }),
+    ).toHaveAttribute('href', '/user/bookings/new?trip=schedule-1&from=1&to=2');
     await actor.click(
       screen.getByRole('button', { name: 'Xem chi tiết hành trình' }),
     );

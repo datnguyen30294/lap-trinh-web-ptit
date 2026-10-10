@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AppLink from '../components/AppLink';
 import '@fontsource-variable/manrope';
 import { useCurrentPosition } from '../components/journey-planner/useCurrentPosition';
 import JourneySidebar from '../components/journey-planner/JourneySidebar';
@@ -82,9 +83,7 @@ export default function JourneyPlannerPage({
           <a href="/user/journey-planner" aria-current="page">
             Lộ trình &amp; Bản đồ
           </a>
-          <span aria-disabled="true" title="Sắp có">
-            Mua vé
-          </span>
+          <AppLink href="/user/bookings">Mua vé</AppLink>
         </nav>
         <div className="jp-account">
           <span>{user.full_name}</span>

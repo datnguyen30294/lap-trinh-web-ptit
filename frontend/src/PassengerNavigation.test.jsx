@@ -55,6 +55,7 @@ vi.mock('./services/journeyPlannerApi', () => ({
   journeyPlannerApi: {
     places: vi.fn(),
     search: vi.fn(),
+    detail: vi.fn(),
     tracking: vi.fn(),
   },
 }));
@@ -258,6 +259,99 @@ it('opens the journey planner from the booking header without reloading the sess
   );
   expect(authApi.me).toHaveBeenCalledTimes(1);
 });
+
+it('opens booking search from the map header without reloading the session', async () => {
+  window.history.replaceState(null, '', '/user/journey-planner');
+  const actor = userEvent.setup();
+  render(<App />);
+  await screen.findByRole('heading', { name: 'Hôm nay bạn đi đâu?' });
+  await actor.click(
+    within(screen.getByRole('banner')).getByRole('link', { name: 'Mua vé' }),
+  );
+  expect(
+    await screen.findByRole('heading', { name: 'Đặt vé trực tuyến' }),
+  ).toBeVisible();
+  expect(window.location.pathname).toBe('/user/bookings');
+  expect(authApi.me).toHaveBeenCalledTimes(1);
+});
+
+it.each(['detail', 'tracking'])(
+  'opens the selected booking from the map %s',
+  async (view) => {
+    const journey = {
+      route_id: '99',
+      route_code: 'TEST-MAP',
+      route_name: 'Bến đầu tới Bến cuối',
+      schedule_id: '10',
+      fare_vnd: 8000,
+      walking_distance_m: 0,
+      walking_minutes: 0,
+      wait_minutes: 5,
+      ride_minutes: 10,
+      total_minutes: 15,
+      pickup_at: '2035-01-01T01:00:00Z',
+      boarding_station: { id: '1', name: 'Bến đầu' },
+      alighting_station: { id: '3', name: 'Bến cuối' },
+      stop_count: 2,
+      walking_after_m: 0,
+      walking_after_minutes: 0,
+    };
+    journeyPlannerApi.detail.mockResolvedValue(journey);
+    if (view === 'tracking') {
+      journeyPlannerApi.tracking.mockResolvedValue({
+        active: {
+          id: 'tracking-1',
+          origin: { latitude: 21.02, longitude: 105.84 },
+          journey,
+          step: 1,
+          pickup_in_seconds: 300,
+          arrival_in_seconds: 900,
+          arrival_at: '2035-01-01T01:10:00Z',
+        },
+      });
+    } else {
+      journeyPlannerApi.search.mockResolvedValueOnce({ items: [journey] });
+    }
+    window.history.replaceState(null, '', '/user/journey-planner');
+    const actor = userEvent.setup();
+    render(<App />);
+    if (view === 'detail') {
+      await screen.findByRole('heading', { name: 'Hôm nay bạn đi đâu?' });
+      await actor.type(
+        screen.getByRole('combobox', { name: 'Điểm đến' }),
+        'Bến cuối',
+      );
+      await actor.click(
+        await screen.findByRole('option', { name: /Bến cuối/ }),
+      );
+      await actor.click(screen.getByRole('button', { name: 'Tìm lộ trình' }));
+      await actor.click(
+        await screen.findByRole('button', { name: /Tuyến TEST-MAP/ }),
+      );
+      await screen.findByRole('heading', { name: 'Chi tiết tuyến TEST-MAP' });
+    } else {
+      await screen.findByRole('heading', { name: 'Đang theo dõi hành trình' });
+    }
+    const sidebar = screen.getByRole('complementary');
+    await actor.click(
+      await within(sidebar).findByRole('link', { name: 'Mua vé' }),
+    );
+    expect(
+      await screen.findByRole('heading', { name: 'Thông tin hành khách' }),
+    ).toBeVisible();
+    expect(window.location.pathname).toBe('/user/bookings/new');
+    expect(window.location.search).toBe('?trip=10&from=1&to=3');
+    expect(bookingsApi.trip).toHaveBeenCalledWith(
+      '10',
+      {
+        from_station_id: '1',
+        to_station_id: '3',
+      },
+      expect.any(AbortSignal),
+    );
+    expect(authApi.me).toHaveBeenCalledTimes(1);
+  },
+);
 
 it('shows the saved receipt after submitting without restarting the app', async () => {
   window.history.replaceState(

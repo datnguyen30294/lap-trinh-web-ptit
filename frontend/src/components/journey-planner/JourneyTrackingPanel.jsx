@@ -1,4 +1,5 @@
 import './journey-tracking.css';
+import JourneyBookingLink from './JourneyBookingLink';
 
 const time = (value) =>
   new Intl.DateTimeFormat('vi-VN', {
@@ -69,9 +70,7 @@ export default function JourneyTrackingPanel({ tracking }) {
         </p>
       )}
       <div className="jp-detail-actions">
-        <button type="button" className="jp-detail-buy" aria-disabled="true">
-          Mua vé
-        </button>
+        <JourneyBookingLink journey={journey} />
         <button
           type="button"
           className="jp-detail-buy"

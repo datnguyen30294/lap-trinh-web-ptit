@@ -1,5 +1,6 @@
 import JourneyTimeline from './JourneyTimeline';
 import JourneySearchSkeleton from './JourneySearchSkeleton';
+import JourneyBookingLink from './JourneyBookingLink';
 import './journey-detail.css';
 
 const money = new Intl.NumberFormat('vi-VN');
@@ -71,9 +72,7 @@ function DetailContent({ journey, onStart, tracking }) {
               ? 'Tiếp tục hành trình'
               : 'Bắt đầu hành trình'}
         </button>
-        <button type="button" className="jp-detail-buy" aria-disabled="true">
-          Mua vé
-        </button>
+        <JourneyBookingLink journey={journey} />
       </div>
     </>
   );
